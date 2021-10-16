@@ -1,0 +1,89 @@
+{
+  "RuntimeVersion": "9.6.0.27784",
+  "ProjectID": "05e62c35-2045-492c-92ac-bb3fbf6ea899",
+  "ProjectName": "ecommerce-app",
+  "ModelVersion": "unversioned",
+  "Description": "",
+  "AdminUser": "MxAdmin",
+  "Roles": {
+    "8dd52bfa-6d7e-453b-b506-303c0a3d9567": {
+      "Name": "Administrator",
+      "ManageableRoles": [
+        "8dd52bfa-6d7e-453b-b506-303c0a3d9567",
+        "53f5d6fa-6da9-4a71-b011-454ec052cce8",
+        "3936ea8a-154e-4303-beaa-2b81422553b6"
+      ]
+    },
+    "53f5d6fa-6da9-4a71-b011-454ec052cce8": {
+      "Name": "User"
+    },
+    "3936ea8a-154e-4303-beaa-2b81422553b6": {
+      "Name": "Anonymous"
+    }
+  },
+  "AdminRole": "8dd52bfa-6d7e-453b-b506-303c0a3d9567",
+  "Constants": [
+    {
+      "Name": "AnyChart_BuildingBlocks.Version",
+      "Type": "String",
+      "Description": "",
+      "DefaultValue": "3.0.2"
+    },
+    {
+      "Name": "Atlas_Core.Atlas_Core_Version",
+      "Type": "String",
+      "Description": "",
+      "DefaultValue": "3.0.7"
+    },
+    {
+      "Name": "Atlas_Web_Content.Atlas_Web_Content_Version",
+      "Type": "String",
+      "Description": "",
+      "DefaultValue": "3.0.6"
+    },
+    {
+      "Name": "DataWidgets.DataWidgets_Version",
+      "Type": "String",
+      "Description": "",
+      "DefaultValue": "2.0.0"
+    },
+    {
+      "Name": "NanoflowCommons.Nanoflow_Commons_Version",
+      "Type": "String",
+      "Description": "",
+      "DefaultValue": "2.1.0"
+    },
+    {
+      "Name": "WebActions.WebActions_Version",
+      "Type": "String",
+      "Description": "",
+      "DefaultValue": "2.3.0"
+    }
+  ],
+  "ScheduledEvents": [],
+  "Configuration": {
+    "SourceDatabaseType": "HSQLDB",
+    "SourceDatabaseName": "default",
+    "SourceBuiltInDatabasePath": "model/sampledata/data/database"
+  },
+  "DataBrokerConfiguration": {
+    "publishedServices": []
+  },
+  "RequestHandlers": [
+    {
+      "Name": "/api/",
+      "DefaultEnabled": true,
+      "MatchExactly": false
+    },
+    {
+      "Name": "/link/",
+      "DefaultEnabled": true,
+      "MatchExactly": false
+    },
+    {
+      "Name": "/p/",
+      "DefaultEnabled": false,
+      "MatchExactly": false
+    }
+  ]
+}

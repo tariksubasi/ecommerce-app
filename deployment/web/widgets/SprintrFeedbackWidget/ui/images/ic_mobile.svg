@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="11px" height="18px" viewBox="0 0 11 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.3 (57544) - http://www.bohemiancoding.com/sketch -->
+    <title>ic_mobile</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="default-toggles---icons" transform="translate(-17.000000, -106.000000)">
+            <g id="Group-3" transform="translate(6.000000, 4.000000)">
+                <g id="Group-4" transform="translate(5.000000, 36.000000)">
+                    <g id="Group">
+                        <g id="ic_mobile" transform="translate(0.000000, 63.000000)">
+                            <rect id="Rectangle-2-Copy-2" fill-rule="nonzero" x="0" y="0" width="24" height="24"></rect>
+                            <path d="M16.4289206,18.3333333 C16.4289206,19.0693333 15.8038413,19.6666667 15.0320952,19.6666667 L8.74638095,19.6666667 C7.97463492,19.6666667 7.34955556,19.0693333 7.34955556,18.3333333 L7.34955556,5.66666667 C7.34955556,4.93066667 7.97463492,4.33333333 8.74638095,4.33333333 L15.0320952,4.33333333 C15.8038413,4.33333333 16.4289206,4.93066667 16.4289206,5.66666667 L16.4289206,18.3333333 L16.4289206,18.3333333 Z" id="Stroke-5155" stroke="#0595DB" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M16.4289206,17 L7.34955556,17" id="Stroke-5156" stroke="#0595DB" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M16.4289206,7 L7.34955556,7" id="Stroke-5157" stroke="#0595DB" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M10.1432063,5.66666667 L13.6352698,5.66666667" id="Stroke-5158" stroke="#0595DB" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M11.8892381,18.6666667 C11.6964762,18.6666667 11.5400317,18.5173333 11.5400317,18.3333333 C11.5400317,18.1493333 11.6964762,18 11.8892381,18 C12.082,18 12.2384444,18.1493333 12.2384444,18.3333333 C12.2384444,18.5173333 12.082,18.6666667 11.8892381,18.6666667 L11.8892381,18.6666667 Z" id="Stroke-5159" stroke="#0595DB" stroke-linejoin="round"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,8 @@
+Buildfile: C:\Users\tarik\Documents\Mendix\ecommerce-app-main\deployment\build_core.xml
+
+clean:
+
+BUILD SUCCESSFUL
+Total time: 0 seconds
+
+

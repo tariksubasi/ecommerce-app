@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="17px" height="17px" viewBox="0 0 17 17" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.3 (57544) - http://www.bohemiancoding.com/sketch -->
+    <title>ic_edit</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="default-toggles---icons" transform="translate(-15.000000, -75.000000)">
+            <g id="Group-3" transform="translate(6.000000, 4.000000)">
+                <g id="Group-4" transform="translate(5.000000, 36.000000)">
+                    <g id="Group">
+                        <g id="ic_edit" transform="translate(0.000000, 32.000000)">
+                            <rect id="Rectangle-2" fill-rule="nonzero" x="0" y="0" width="24" height="24"></rect>
+                            <path d="M8.86293333,18.4498667 L4.55226667,19.4612 L5.5636,15.1512 L15.9629333,4.74986667 C16.4842667,4.2292 17.3289333,4.2292 17.8496,4.74986667 L19.2642667,6.16386667 C19.7842667,6.6852 19.7842667,7.52853333 19.2642667,8.04986667 L8.86293333,18.4498667 L8.86293333,18.4498667 Z" id="Stroke-153" stroke="#0595DB" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M18.7939333,8.5228 L15.4919333,5.2208" id="Stroke-154" stroke="#0595DB" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M17.8428,9.47426667 L14.5488,6.16426667" id="Stroke-155" stroke="#0595DB" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M9.03093333,18.2828667 L5.73093333,14.9828667" id="Stroke-156" stroke="#0595DB" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

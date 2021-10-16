@@ -1,0 +1,10 @@
+Buildfile: C:\Users\tarik\Documents\Mendix\ecommerce-app-main\deployment\build_core.xml
+
+deploy:
+     [copy] Copying 41 files to C:\Users\tarik\Documents\Mendix\ecommerce-app-main\deployment
+     [copy] Copying 5 files to C:\Users\tarik\Documents\Mendix\ecommerce-app-main\deployment\model\resources
+
+BUILD SUCCESSFUL
+Total time: 0 seconds
+
+

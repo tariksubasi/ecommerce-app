@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="18px" height="18px" viewBox="0 0 18 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.3 (57544) - http://www.bohemiancoding.com/sketch -->
+    <title>ic_share</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="default-toggles---icons" transform="translate(-13.000000, -136.000000)">
+            <g id="Group-3" transform="translate(6.000000, 4.000000)">
+                <g id="Group-4" transform="translate(5.000000, 36.000000)">
+                    <g id="Group">
+                        <g id="ic_share" transform="translate(0.000000, 93.000000)">
+                            <rect id="Rectangle-2-Copy-3" fill-rule="nonzero" x="0" y="0" width="24" height="24"></rect>
+                            <path d="M8.3828,10.8086 C7.94546667,9.9346 7.04413333,9.33326667 6.00013333,9.33326667 C4.52746667,9.33326667 3.33346667,10.5272667 3.33346667,11.9999333 C3.33346667,13.4726 4.52746667,14.6666 6.00013333,14.6666 C7.04413333,14.6666 7.94546667,14.0652667 8.3828,13.1912667" id="Stroke-797" stroke="#0595DB" stroke-linejoin="round"></path>
+                            <path d="M16,9.66666667 C17.4726667,9.66666667 18.6666667,8.47266667 18.6666667,7 C18.6666667,5.52733333 17.4726667,4.33333333 16,4.33333333 C14.5273333,4.33333333 13.3333333,5.52733333 13.3333333,7 C13.3333333,7.42866667 13.4373333,7.832 13.6166667,8.19133333" id="Stroke-798" stroke="#0595DB" stroke-linejoin="round"></path>
+                            <path d="M13.6165333,15.8086 C12.7318667,17.5739333 14.0158667,19.6666 15.9998667,19.6666 C17.4725333,19.6666 18.6665333,18.4726 18.6665333,16.9999333 C18.6665333,15.5272667 17.4725333,14.3332667 15.9998667,14.3332667" id="Stroke-799" stroke="#0595DB" stroke-linejoin="round"></path>
+                            <path d="M16,9.66666667 C14.956,9.66666667 14.0546667,9.06533333 13.6166667,8.19133333 L8.38266667,10.8086667 C8.56266667,11.1666667 8.66666667,11.5706667 8.66666667,12 C8.66666667,12.4286667 8.56266667,12.832 8.38266667,13.1913333 L13.6166667,15.8086667 C14.0546667,14.9346667 14.956,14.3333333 16,14.3333333" id="Stroke-800" stroke="#0595DB" stroke-linejoin="round"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

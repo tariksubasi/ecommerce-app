@@ -1,0 +1,21 @@
+{
+  "Configuration": {
+    "DatabaseName": "default",
+    "DatabasePassword": "",
+    "DatabaseType": "HSQLDB",
+    "DatabaseHost": "",
+    "DatabaseUserName": "",
+    "DatabaseUseIntegratedSecurity": "False",
+    "ApplicationRootUrl": "http://localhost:8080/",
+    "ScheduledEventExecution": "None"
+  },
+  "Constants": {
+    "AnyChart_BuildingBlocks.Version": "3.0.2",
+    "Atlas_Core.Atlas_Core_Version": "3.0.7",
+    "Atlas_Web_Content.Atlas_Web_Content_Version": "3.0.6",
+    "DataWidgets.DataWidgets_Version": "2.0.0",
+    "NanoflowCommons.Nanoflow_Commons_Version": "2.1.0",
+    "WebActions.WebActions_Version": "2.3.0"
+  },
+  "AdminPassword": "1"
+}

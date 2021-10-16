@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="17px" height="17px" viewBox="0 0 17 17" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.3 (57544) - http://www.bohemiancoding.com/sketch -->
+    <title>ic_buzz</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="default-toggles---icons" transform="translate(-14.000000, -44.000000)">
+            <g id="Group-3" transform="translate(6.000000, 4.000000)">
+                <g id="Group-4" transform="translate(5.000000, 36.000000)">
+                    <g id="Group">
+                        <g id="ic_buzz">
+                            <rect id="Rectangle-2-Copy" fill-rule="nonzero" x="0" y="0" width="24" height="24"></rect>
+                            <path d="M8.62666667,14.0752077 C8.30066667,14.0318454 7.97866667,13.9628599 7.66666667,13.8695652 L4.33333333,15.1835749 L5.66666667,12.884058 C4.61733333,12.0568889 4,10.8309179 4,9.5556715 C4,7.04 6.53666667,5 9.66666667,5 C12.796,5 15.3333333,7.04 15.3333333,9.5556715" id="Stroke-785" stroke="#0595DB" stroke-linecap="round" stroke-linejoin="round"></path>
+                            <path d="M10,14.942029 C10,17.7592657 13.3333333,19.8695652 16.3333333,18.5555556 L19,19.5410628 L18,17.5700483 C18.864,16.8887343 19.3333333,15.9919227 19.3333333,14.942029 C19.3333333,12.8698357 17.244,11 14.6666667,11 C12.0893333,11 10,12.8698357 10,14.942029 L10,14.942029 Z" id="Stroke-786" stroke="#0595DB" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
