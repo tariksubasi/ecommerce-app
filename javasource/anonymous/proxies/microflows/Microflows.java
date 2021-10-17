@@ -15,6 +15,12 @@ import com.mendix.systemwideinterfaces.core.IMendixObject;
 public class Microflows
 {
 	// These are the microflows for the Anonymous module
+	public static void aCT_RegisterUser(IContext context, anonymous.proxies.Anonymous _anonymous)
+	{
+		Map<java.lang.String, Object> params = new HashMap<>();
+		params.put("Anonymous", _anonymous == null ? null : _anonymous.getMendixObject());
+		Core.microflowCall("Anonymous.ACT_RegisterUser").withParams(params).execute(context);
+	}
 	public static void aCT_ShowMessageFromMicroflow(IContext context)
 	{
 		Map<java.lang.String, Object> params = new HashMap<>();

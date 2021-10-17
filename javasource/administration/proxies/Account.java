@@ -19,6 +19,10 @@ public class Account extends system.proxies.User
 		FullName("FullName"),
 		Email("Email"),
 		IsLocalUser("IsLocalUser"),
+		BirthDate("BirthDate"),
+		Gender("Gender"),
+		SurName("SurName"),
+		FirstName("FirstName"),
 		Name("Name"),
 		Password("Password"),
 		LastLogin("LastLogin"),
@@ -195,6 +199,158 @@ public class Account extends system.proxies.User
 	public final void setIsLocalUser(com.mendix.systemwideinterfaces.core.IContext context, java.lang.Boolean islocaluser)
 	{
 		getMendixObject().setValue(context, MemberNames.IsLocalUser.toString(), islocaluser);
+	}
+
+	/**
+	 * @return value of BirthDate
+	 */
+	public final java.util.Date getBirthDate()
+	{
+		return getBirthDate(getContext());
+	}
+
+	/**
+	 * @param context
+	 * @return value of BirthDate
+	 */
+	public final java.util.Date getBirthDate(com.mendix.systemwideinterfaces.core.IContext context)
+	{
+		return (java.util.Date) getMendixObject().getValue(context, MemberNames.BirthDate.toString());
+	}
+
+	/**
+	 * Set value of BirthDate
+	 * @param birthdate
+	 */
+	public final void setBirthDate(java.util.Date birthdate)
+	{
+		setBirthDate(getContext(), birthdate);
+	}
+
+	/**
+	 * Set value of BirthDate
+	 * @param context
+	 * @param birthdate
+	 */
+	public final void setBirthDate(com.mendix.systemwideinterfaces.core.IContext context, java.util.Date birthdate)
+	{
+		getMendixObject().setValue(context, MemberNames.BirthDate.toString(), birthdate);
+	}
+
+	/**
+	 * Set value of Gender
+	 * @param gender
+	 */
+	public final anonymous.proxies.ENUM_Gender getGender()
+	{
+		return getGender(getContext());
+	}
+
+	/**
+	 * @param context
+	 * @return value of Gender
+	 */
+	public final anonymous.proxies.ENUM_Gender getGender(com.mendix.systemwideinterfaces.core.IContext context)
+	{
+		Object obj = getMendixObject().getValue(context, MemberNames.Gender.toString());
+		if (obj == null)
+			return null;
+
+		return anonymous.proxies.ENUM_Gender.valueOf((java.lang.String) obj);
+	}
+
+	/**
+	 * Set value of Gender
+	 * @param gender
+	 */
+	public final void setGender(anonymous.proxies.ENUM_Gender gender)
+	{
+		setGender(getContext(), gender);
+	}
+
+	/**
+	 * Set value of Gender
+	 * @param context
+	 * @param gender
+	 */
+	public final void setGender(com.mendix.systemwideinterfaces.core.IContext context, anonymous.proxies.ENUM_Gender gender)
+	{
+		if (gender != null)
+			getMendixObject().setValue(context, MemberNames.Gender.toString(), gender.toString());
+		else
+			getMendixObject().setValue(context, MemberNames.Gender.toString(), null);
+	}
+
+	/**
+	 * @return value of SurName
+	 */
+	public final java.lang.String getSurName()
+	{
+		return getSurName(getContext());
+	}
+
+	/**
+	 * @param context
+	 * @return value of SurName
+	 */
+	public final java.lang.String getSurName(com.mendix.systemwideinterfaces.core.IContext context)
+	{
+		return (java.lang.String) getMendixObject().getValue(context, MemberNames.SurName.toString());
+	}
+
+	/**
+	 * Set value of SurName
+	 * @param surname
+	 */
+	public final void setSurName(java.lang.String surname)
+	{
+		setSurName(getContext(), surname);
+	}
+
+	/**
+	 * Set value of SurName
+	 * @param context
+	 * @param surname
+	 */
+	public final void setSurName(com.mendix.systemwideinterfaces.core.IContext context, java.lang.String surname)
+	{
+		getMendixObject().setValue(context, MemberNames.SurName.toString(), surname);
+	}
+
+	/**
+	 * @return value of FirstName
+	 */
+	public final java.lang.String getFirstName()
+	{
+		return getFirstName(getContext());
+	}
+
+	/**
+	 * @param context
+	 * @return value of FirstName
+	 */
+	public final java.lang.String getFirstName(com.mendix.systemwideinterfaces.core.IContext context)
+	{
+		return (java.lang.String) getMendixObject().getValue(context, MemberNames.FirstName.toString());
+	}
+
+	/**
+	 * Set value of FirstName
+	 * @param firstname
+	 */
+	public final void setFirstName(java.lang.String firstname)
+	{
+		setFirstName(getContext(), firstname);
+	}
+
+	/**
+	 * Set value of FirstName
+	 * @param context
+	 * @param firstname
+	 */
+	public final void setFirstName(com.mendix.systemwideinterfaces.core.IContext context, java.lang.String firstname)
+	{
+		getMendixObject().setValue(context, MemberNames.FirstName.toString(), firstname);
 	}
 
 	@java.lang.Override
