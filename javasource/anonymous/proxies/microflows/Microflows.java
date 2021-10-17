@@ -15,10 +15,15 @@ import com.mendix.systemwideinterfaces.core.IMendixObject;
 public class Microflows
 {
 	// These are the microflows for the Anonymous module
-	public static anonymous.proxies.Anonymous dS_Login(IContext context)
+	public static void aCT_ShowMessageFromMicroflow(IContext context)
 	{
 		Map<java.lang.String, Object> params = new HashMap<>();
-		IMendixObject result = (IMendixObject)Core.microflowCall("Anonymous.DS_Login").withParams(params).execute(context);
+		Core.microflowCall("Anonymous.ACT_ShowMessageFromMicroflow").withParams(params).execute(context);
+	}
+	public static anonymous.proxies.Anonymous dS_Anonymous(IContext context)
+	{
+		Map<java.lang.String, Object> params = new HashMap<>();
+		IMendixObject result = (IMendixObject)Core.microflowCall("Anonymous.DS_Anonymous").withParams(params).execute(context);
 		return result == null ? null : anonymous.proxies.Anonymous.initialize(context, result);
 	}
 }
