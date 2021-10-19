@@ -21,11 +21,6 @@ public class Microflows
 		params.put("Anonymous", _anonymous == null ? null : _anonymous.getMendixObject());
 		Core.microflowCall("Anonymous.ACT_RegisterUser").withParams(params).execute(context);
 	}
-	public static void aCT_ShowMessageFromMicroflow(IContext context)
-	{
-		Map<java.lang.String, Object> params = new HashMap<>();
-		Core.microflowCall("Anonymous.ACT_ShowMessageFromMicroflow").withParams(params).execute(context);
-	}
 	public static anonymous.proxies.Anonymous dS_Anonymous(IContext context)
 	{
 		Map<java.lang.String, Object> params = new HashMap<>();

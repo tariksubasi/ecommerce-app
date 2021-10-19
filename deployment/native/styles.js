@@ -2,7 +2,7 @@ import * as style0 from "C:/Users/tarik/Documents/Mendix/ecommerce-app-main/them
 import * as style1 from "C:/Users/tarik/Documents/Mendix/ecommerce-app-main/themesource/nanoflowcommons/native/main";
 import * as style2 from "C:/Users/tarik/Documents/Mendix/ecommerce-app-main/themesource/webactions/native/main";
 import * as style3 from "C:/Users/tarik/Documents/Mendix/ecommerce-app-main/themesource/atlas_core/native/main";
-import * as style4 from "C:/Users/tarik/Documents/Mendix/ecommerce-app-main/themesource/myfirstmodule/native/main";
+import * as style4 from "C:/Users/tarik/Documents/Mendix/ecommerce-app-main/themesource/admin/native/main";
 import * as style5 from "C:/Users/tarik/Documents/Mendix/ecommerce-app-main/themesource/anonymous/native/main";
 import * as style6 from "C:/Users/tarik/Documents/Mendix/ecommerce-app-main/theme/native/main";
 
