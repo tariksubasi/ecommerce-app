@@ -9,6 +9,6 @@ package:
       [jar] Building jar: C:\Users\tarik\Documents\Mendix\ecommerce-app-main\deployment\model\bundles\project.jar
 
 BUILD SUCCESSFUL
-Total time: 0 seconds
+Total time: 1 second
 
 
