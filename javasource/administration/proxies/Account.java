@@ -31,6 +31,7 @@ public class Account extends system.proxies.User
 		FailedLogins("FailedLogins"),
 		WebServiceUser("WebServiceUser"),
 		IsAnonymous("IsAnonymous"),
+		Account_ProfileImage("Administration.Account_ProfileImage"),
 		UserRoles("System.UserRoles"),
 		User_Language("System.User_Language"),
 		User_TimeZone("System.User_TimeZone");
@@ -351,6 +352,49 @@ public class Account extends system.proxies.User
 	public final void setFirstName(com.mendix.systemwideinterfaces.core.IContext context, java.lang.String firstname)
 	{
 		getMendixObject().setValue(context, MemberNames.FirstName.toString(), firstname);
+	}
+
+	/**
+	 * @return value of Account_ProfileImage
+	 */
+	public final administration.proxies.ProfileImage getAccount_ProfileImage() throws com.mendix.core.CoreException
+	{
+		return getAccount_ProfileImage(getContext());
+	}
+
+	/**
+	 * @param context
+	 * @return value of Account_ProfileImage
+	 */
+	public final administration.proxies.ProfileImage getAccount_ProfileImage(com.mendix.systemwideinterfaces.core.IContext context) throws com.mendix.core.CoreException
+	{
+		administration.proxies.ProfileImage result = null;
+		com.mendix.systemwideinterfaces.core.IMendixIdentifier identifier = getMendixObject().getValue(context, MemberNames.Account_ProfileImage.toString());
+		if (identifier != null)
+			result = administration.proxies.ProfileImage.load(context, identifier);
+		return result;
+	}
+
+	/**
+	 * Set value of Account_ProfileImage
+	 * @param account_profileimage
+	 */
+	public final void setAccount_ProfileImage(administration.proxies.ProfileImage account_profileimage)
+	{
+		setAccount_ProfileImage(getContext(), account_profileimage);
+	}
+
+	/**
+	 * Set value of Account_ProfileImage
+	 * @param context
+	 * @param account_profileimage
+	 */
+	public final void setAccount_ProfileImage(com.mendix.systemwideinterfaces.core.IContext context, administration.proxies.ProfileImage account_profileimage)
+	{
+		if (account_profileimage == null)
+			getMendixObject().setValue(context, MemberNames.Account_ProfileImage.toString(), null);
+		else
+			getMendixObject().setValue(context, MemberNames.Account_ProfileImage.toString(), account_profileimage.getMendixObject().getId());
 	}
 
 	@java.lang.Override
