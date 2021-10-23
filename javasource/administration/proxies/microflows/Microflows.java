@@ -15,6 +15,12 @@ import com.mendix.systemwideinterfaces.core.IMendixObject;
 public class Microflows
 {
 	// These are the microflows for the Administration module
+	public static boolean bCo_CommitFullName(IContext context, administration.proxies.Account _account)
+	{
+		Map<java.lang.String, Object> params = new HashMap<>();
+		params.put("Account", _account == null ? null : _account.getMendixObject());
+		return (java.lang.Boolean) Core.microflowCall("Administration.BCo_CommitFullName").withParams(params).execute(context);
+	}
 	public static void changeMyPassword(IContext context, administration.proxies.AccountPasswordData _accountPasswordData)
 	{
 		Map<java.lang.String, Object> params = new HashMap<>();
