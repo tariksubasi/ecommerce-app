@@ -82,6 +82,12 @@ public class FileDocument
 		if (com.mendix.core.Core.isSubClassOf("System.SynchronizationErrorFile", mendixObject.getType()))
 			return system.proxies.SynchronizationErrorFile.initialize(context, mendixObject);
 
+		if (com.mendix.core.Core.isSubClassOf("ExcelImporter.TemplateDocument", mendixObject.getType()))
+			return excelimporter.proxies.TemplateDocument.initialize(context, mendixObject);
+
+		if (com.mendix.core.Core.isSubClassOf("ExcelImporter.XMLDocumentTemplate", mendixObject.getType()))
+			return excelimporter.proxies.XMLDocumentTemplate.initialize(context, mendixObject);
+
 		return new system.proxies.FileDocument(context, mendixObject);
 	}
 

@@ -8,5 +8,16 @@
 	<classpathentry kind="lib" path="C:/Program Files/Mendix/9.6.0.27784/runtime/bundles/com.mendix.public-api.jar"/>
 	<classpathentry kind="lib" path="C:/Program Files/Mendix/9.6.0.27784/runtime/bundles/javax.servlet-api.servlet.jar"/>
 	<classpathentry kind="lib" path="C:/Program Files/Mendix/9.6.0.27784/runtime/bundles/javax.websocket-api.websocket.jar"/>
+	<classpathentry kind="lib" path="userlib/com.github.virtuald.curvesapi-1.06.jar"/>
+	<classpathentry kind="lib" path="userlib/com.zaxxer.SparseBitSet-1.2.jar"/>
+	<classpathentry kind="lib" path="userlib/commons-codec.commons-codec-1.13.jar"/>
+	<classpathentry kind="lib" path="userlib/org.apache.commons.commons-collections4-4.4.jar"/>
+	<classpathentry kind="lib" path="userlib/org.apache.commons.commons-compress-1.21.jar"/>
+	<classpathentry kind="lib" path="userlib/org.apache.commons.commons-math3-3.6.1.jar"/>
+	<classpathentry kind="lib" path="userlib/org.apache.poi.poi-4.1.2.jar"/>
+	<classpathentry kind="lib" path="userlib/org.apache.poi.poi-ooxml-4.1.2.jar"/>
+	<classpathentry kind="lib" path="userlib/org.apache.poi.poi-ooxml-schemas-4.1.2.jar"/>
+	<classpathentry kind="lib" path="userlib/org.apache.xmlbeans.xmlbeans-3.1.0.jar"/>
+	<classpathentry kind="lib" path="userlib/replication.jar"/>
 	<classpathentry kind="output" path="deployment/run/bin"/>
 </classpath>
