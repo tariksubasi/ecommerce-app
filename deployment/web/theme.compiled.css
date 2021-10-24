@@ -23263,4 +23263,8 @@ div:not(.table-compact) > .table .th .dropdown-container .dropdown-list {
   padding: 5%;
 }
 
+.mx-image-viewer {
+  width: 50px !important;
+}
+
 /*# sourceMappingURL=theme.compiled.css.map */
