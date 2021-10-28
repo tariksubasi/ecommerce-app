@@ -23267,4 +23267,8 @@ div:not(.table-compact) > .table .th .dropdown-container .dropdown-list {
   width: 50px !important;
 }
 
+.selected-product {
+  background-color: #c5ecdf;
+}
+
 /*# sourceMappingURL=theme.compiled.css.map */
