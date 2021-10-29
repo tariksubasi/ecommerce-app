@@ -36,7 +36,6 @@ SET SCHEMA PUBLIC
 CREATE SEQUENCE PUBLIC."system$queuedtask_sequence_mxseq" AS BIGINT START WITH 1
 CREATE SEQUENCE PUBLIC."system$filedocument_fileid_mxseq" AS BIGINT START WITH 1
 CREATE SEQUENCE PUBLIC."excelimporter$template_nr_mxseq" AS BIGINT START WITH 1
-CREATE SEQUENCE PUBLIC."salesmanager$sales_salesid_mxseq" AS BIGINT START WITH 1
 CREATE SEQUENCE PUBLIC."salesmanager$product__id_mxseq" AS BIGINT START WITH 1
 CREATE SEQUENCE PUBLIC."salesmanager$sales__id_mxseq" AS BIGINT START WITH 1
 CREATE SEQUENCE PUBLIC."salesmanager$productcategory__id_mxseq" AS BIGINT START WITH 1
@@ -299,19 +298,20 @@ CREATE MEMORY TABLE PUBLIC."mxmodelreflection$mxobjecttype_subclassof_mxobjectty
 CREATE INDEX "idx_mxmodelreflection$mxobjecttype_subclassof_mxobjecttype_mxmodelreflection$mxobjecttype_mxmodelreflection$mxobjecttype" ON PUBLIC."mxmodelreflection$mxobjecttype_subclassof_mxobjecttype"("mxmodelreflection$mxobjecttypeid2","mxmodelreflection$mxobjecttypeid1")
 CREATE MEMORY TABLE PUBLIC."mxmodelreflection$mxobjecttype_module"("mxmodelreflection$mxobjecttypeid" BIGINT NOT NULL,"mxmodelreflection$moduleid" BIGINT NOT NULL,PRIMARY KEY("mxmodelreflection$mxobjecttypeid","mxmodelreflection$moduleid"),CONSTRAINT "uniq_mxmodelreflection$mxobjecttype_module_mxmodelreflection$mxobjecttypeid" UNIQUE("mxmodelreflection$mxobjecttypeid"))
 CREATE INDEX "idx_mxmodelreflection$mxobjecttype_module_mxmodelreflection$module_mxmodelreflection$mxobjecttype" ON PUBLIC."mxmodelreflection$mxobjecttype_module"("mxmodelreflection$moduleid","mxmodelreflection$mxobjecttypeid")
-CREATE MEMORY TABLE PUBLIC."salesmanager$sales"("id" BIGINT NOT NULL PRIMARY KEY,"salesid" BIGINT,"salesheader" VARCHAR(200) COLLATE INFORMATION_SCHEMA.SQL_TEXT_UCC,"_id" BIGINT)
-CREATE MEMORY TABLE PUBLIC."salesmanager$sales_product"("salesmanager$salesid" BIGINT NOT NULL,"salesmanager$productid" BIGINT NOT NULL,PRIMARY KEY("salesmanager$salesid","salesmanager$productid"),CONSTRAINT "uniq_salesmanager$sales_product_salesmanager$salesid" UNIQUE("salesmanager$salesid"))
+CREATE MEMORY TABLE PUBLIC."salesmanager$sales"("id" BIGINT NOT NULL PRIMARY KEY,"salesheader" VARCHAR(200) COLLATE INFORMATION_SCHEMA.SQL_TEXT_UCC,"_id" BIGINT)
+CREATE MEMORY TABLE PUBLIC."salesmanager$sales_product"("salesmanager$salesid" BIGINT NOT NULL,"salesmanager$productid" BIGINT NOT NULL,PRIMARY KEY("salesmanager$salesid","salesmanager$productid"))
 CREATE INDEX "idx_salesmanager$sales_product_salesmanager$product_salesmanager$sales" ON PUBLIC."salesmanager$sales_product"("salesmanager$productid","salesmanager$salesid")
 CREATE MEMORY TABLE PUBLIC."salesmanager$product_productcategory"("salesmanager$productid" BIGINT NOT NULL,"salesmanager$productcategoryid" BIGINT NOT NULL,PRIMARY KEY("salesmanager$productid","salesmanager$productcategoryid"),CONSTRAINT "uniq_salesmanager$product_productcategory_salesmanager$productid" UNIQUE("salesmanager$productid"))
 CREATE INDEX "idx_salesmanager$product_productcategory_salesmanager$productcategory_salesmanager$product" ON PUBLIC."salesmanager$product_productcategory"("salesmanager$productcategoryid","salesmanager$productid")
 CREATE MEMORY TABLE PUBLIC."salesmanager$productcategory"("id" BIGINT NOT NULL PRIMARY KEY,"categoryname" VARCHAR(200) COLLATE INFORMATION_SCHEMA.SQL_TEXT_UCC,"_id" BIGINT)
+CREATE MEMORY TABLE PUBLIC."salesmanager$sales_account"("salesmanager$salesid" BIGINT NOT NULL,"administration$accountid" BIGINT NOT NULL,PRIMARY KEY("salesmanager$salesid","administration$accountid"),CONSTRAINT "uniq_salesmanager$sales_account_salesmanager$salesid" UNIQUE("salesmanager$salesid"))
+CREATE INDEX "idx_salesmanager$sales_account_administration$account_salesmanager$sales" ON PUBLIC."salesmanager$sales_account"("administration$accountid","salesmanager$salesid")
 ALTER SEQUENCE SYSTEM_LOBS.LOB_ID RESTART WITH 1
 ALTER SEQUENCE PUBLIC."system$queuedtask_sequence_mxseq" RESTART WITH 1
 ALTER SEQUENCE PUBLIC."system$filedocument_fileid_mxseq" RESTART WITH 32
 ALTER SEQUENCE PUBLIC."excelimporter$template_nr_mxseq" RESTART WITH 3
-ALTER SEQUENCE PUBLIC."salesmanager$sales_salesid_mxseq" RESTART WITH 4
 ALTER SEQUENCE PUBLIC."salesmanager$product__id_mxseq" RESTART WITH 102
-ALTER SEQUENCE PUBLIC."salesmanager$sales__id_mxseq" RESTART WITH 4
+ALTER SEQUENCE PUBLIC."salesmanager$sales__id_mxseq" RESTART WITH 12
 ALTER SEQUENCE PUBLIC."salesmanager$productcategory__id_mxseq" RESTART WITH 6
 SET DATABASE DEFAULT INITIAL SCHEMA PUBLIC
 GRANT USAGE ON DOMAIN INFORMATION_SCHEMA.SQL_IDENTIFIER TO PUBLIC
@@ -424,7 +424,6 @@ INSERT INTO "mendixsystem$attribute" VALUES('272f49fe-6a64-3ede-a32d-344a34e57b9
 INSERT INTO "mendixsystem$attribute" VALUES('278854e9-73cf-4bcb-930c-cd1352a912ec','1a9fd9fa-6105-4b55-88ba-c6cdab086a25','FindObjectReference','findobjectreference',30,200,'',FALSE)
 INSERT INTO "mendixsystem$attribute" VALUES('28d526e0-915b-466f-80c8-56af32ece225','282e2e60-88a5-469d-84a5-ba8d9151644f','IsAnonymous','isanonymous',10,0,'false',FALSE)
 INSERT INTO "mendixsystem$attribute" VALUES('29d27bde-bc08-4f80-9d6c-9f47a3209452','f9818ad8-3214-4b1d-b837-3181863f5ed5','ObjectContent','objectcontent',30,0,'',FALSE)
-INSERT INTO "mendixsystem$attribute" VALUES('2a0a5642-97bc-4964-9ed6-8760100c6361','c519bcae-d827-4225-8b6b-028055423a1a','SalesId','salesid',0,0,'1',TRUE)
 INSERT INTO "mendixsystem$attribute" VALUES('2c189e57-5854-48ed-86d7-71006649e91b','26f05bbe-7af2-417f-a578-e3c845de3267','Caption','caption',30,200,'',FALSE)
 INSERT INTO "mendixsystem$attribute" VALUES('2c5449d3-09f4-463f-8a99-439c6cb74fed','30834a21-e81c-4cbf-a10b-5f60f5fddc82','ModelJSON','modeljson',30,0,'',FALSE)
 INSERT INTO "mendixsystem$attribute" VALUES('2dbe88f5-2b15-4ec3-b295-2e2b496a1ebd','d4154981-8dac-4150-aec5-efa3ef62a7a2','AllowedNumberOfConcurrentUsers','allowednumberofconcurrentusers',3,0,'',FALSE)
@@ -655,7 +654,7 @@ INSERT INTO "mendixsystem$attribute" VALUES('efddc0e0-4a4d-4050-aa74-6c80e527eb4
 INSERT INTO "mendixsystem$attribute" VALUES('f14712ed-2c64-4a83-8dea-bdc8fca46db0','4752f761-ec76-41ae-a098-131d0b93433b','Module','module',30,200,'',FALSE)
 INSERT INTO "mendixsystem$attribute" VALUES('f1949c9c-7b28-11e6-8b77-86f30ca893d3','37f9fd49-5318-4c63-9a51-f761779b202f','ReadOnlyHashKey','readonlyhashkey',30,36,'',FALSE)
 INSERT INTO "mendixsystem$attribute" VALUES('f1c4c80b-4ddb-454e-b814-cd2f5258a1c9','24a87b50-c3fb-4df1-b633-fc40801a1155','IgnoreEmptyKeys','ignoreemptykeys',10,0,'true',FALSE)
-INSERT INTO "mendixsystem$attribute" VALUES('f2264bee-2f90-4557-bc59-f42fa47a27cb','c519bcae-d827-4225-8b6b-028055423a1a','SalesHeader','salesheader',30,200,'',FALSE)
+INSERT INTO "mendixsystem$attribute" VALUES('f2264bee-2f90-4557-bc59-f42fa47a27cb','c519bcae-d827-4225-8b6b-028055423a1a','SalesHeader','salesheader',30,200,'Multiple Categories',FALSE)
 INSERT INTO "mendixsystem$attribute" VALUES('f4d19200-071c-45e5-af25-321354f0702b','37f9fd49-5318-4c63-9a51-f761779b202f','CSRFToken','csrftoken',30,36,'',FALSE)
 INSERT INTO "mendixsystem$attribute" VALUES('f87a5a98-730e-4c57-b6c4-ae09cd057e65','3729d27c-735b-457a-b210-9dffb125c3f3','State','state',40,11,'Initialized',FALSE)
 INSERT INTO "mendixsystem$attribute" VALUES('fa5f48d5-d89f-3022-bdab-059cfc5b12ec','137064d4-4cf1-4a0b-92a5-a11b66360ff9','createdDate','createddate',20,0,'',FALSE)
@@ -809,6 +808,7 @@ INSERT INTO "mendixsystem$association" VALUES('546aaff5-62e1-40ce-ab45-d40d0a047
 INSERT INTO "mendixsystem$association" VALUES('55f415d4-8341-4fce-bdbf-6015a2005f47','MxModelReflection.MxObjectType_Module','mxmodelreflection$mxobjecttype_module','11f2ed0a-a686-452a-86cb-c23255dc7d53','80d749f8-a4a1-49ed-9416-0313e6c33180','mxmodelreflection$mxobjecttypeid','mxmodelreflection$moduleid',NULL,'idx_mxmodelreflection$mxobjecttype_module_mxmodelreflection$module_mxmodelreflection$mxobjecttype')
 INSERT INTO "mendixsystem$association" VALUES('57be330e-fb42-3d0a-b789-c9eac33d73c4','System.changedBy','system$changedby','1be2e53c-6123-4c2f-9bb6-29db7d7fbec0','282e2e60-88a5-469d-84a5-ba8d9151644f','id','system$changedby',NULL,NULL)
 INSERT INTO "mendixsystem$association" VALUES('58aa640e-8db7-479b-9f91-2425b009ee06','System.Workflow_CurrentActivity','system$workflow_currentactivity','2ae37bf5-ecb8-4c55-b967-d7383925b208','a5952592-bb2c-4798-9805-f9ff91ad97de','system$workflowid','system$workflowactivityid',NULL,'idx_system$workflow_currentactivity_system$workflowactivity_system$workflow')
+INSERT INTO "mendixsystem$association" VALUES('5ad73ea5-f0c6-405d-b437-436828f7b174','SalesManager.Sales_Account','salesmanager$sales_account','c519bcae-d827-4225-8b6b-028055423a1a','3078a23e-13b2-4a9b-84e4-2881fdee53c6','salesmanager$salesid','administration$accountid',NULL,'idx_salesmanager$sales_account_administration$account_salesmanager$sales')
 INSERT INTO "mendixsystem$association" VALUES('5d40e1dd-b66d-415b-a4cf-aaf8a19716bd','MxModelReflection.MxObjectReference_Module','mxmodelreflection$mxobjectreference_module','2f7c4632-cf12-44f0-b729-545e6a5bdc55','80d749f8-a4a1-49ed-9416-0313e6c33180','mxmodelreflection$mxobjectreferenceid','mxmodelreflection$moduleid',NULL,'idx_mxmodelreflection$mxobjectreference_module_mxmodelreflection$module_mxmodelreflection$mxobjectreference')
 INSERT INTO "mendixsystem$association" VALUES('5f2d8269-a4d2-432d-b6c4-74bbbc2d913f','MxModelReflection.Token_MxObjectType_Referenced','mxmodelreflection$token_mxobjecttype_referenced','1a9fd9fa-6105-4b55-88ba-c6cdab086a25','11f2ed0a-a686-452a-86cb-c23255dc7d53','mxmodelreflection$tokenid','mxmodelreflection$mxobjecttypeid',NULL,'idx_mxmodelreflection$token_mxobjecttype_referenced_mxmodelreflection$mxobjecttype_mxmodelreflection$token')
 INSERT INTO "mendixsystem$association" VALUES('6013226d-aeae-3cd2-acec-d95d8bd5c3ad','System.changedBy','system$changedby','282e2e60-88a5-469d-84a5-ba8d9151644f','282e2e60-88a5-469d-84a5-ba8d9151644f','id','system$changedby',NULL,NULL)
@@ -874,9 +874,8 @@ INSERT INTO "mendixsystem$association" VALUES('f76bac90-7762-4115-92aa-3a0998445
 INSERT INTO "mendixsystem$association" VALUES('fa5af63f-2826-3827-a729-1ba77710ca10','System.changedBy','system$changedby','2f7c4632-cf12-44f0-b729-545e6a5bdc55','282e2e60-88a5-469d-84a5-ba8d9151644f','id','system$changedby',NULL,NULL)
 INSERT INTO "mendixsystem$association" VALUES('fc3944c4-7a19-4a4d-9b0d-4a0c9d7aeb23','System.BackgroundJob_XASInstance','system$backgroundjob_xasinstance','660db38b-5ab4-4d15-b649-93a947ecea82','d4154981-8dac-4150-aec5-efa3ef62a7a2','system$backgroundjobid','system$xasinstanceid',NULL,'idx_system$backgroundjob_xasinstance_system$xasinstance_system$backgroundjob')
 INSERT INTO "mendixsystem$association" VALUES('fdf628c8-ca86-402e-b639-a7672b1508b8','MxModelReflection.Microflows_InputParameter','mxmodelreflection$microflows_inputparameter','4752f761-ec76-41ae-a098-131d0b93433b','6db8ad59-344d-4349-be0b-81cea5bd5401','mxmodelreflection$microflowsid','mxmodelreflection$parameterid',NULL,'idx_mxmodelreflection$microflows_inputparameter_mxmodelreflection$parameter_mxmodelreflection$microflows')
-INSERT INTO "mendixsystem$version" VALUES('4.2','2021-10-29 04:27:48.848000','4.1.0','unversioned','ecommerce-app','9.6.0.27784')
+INSERT INTO "mendixsystem$version" VALUES('4.2','2021-10-29 15:28:30.409000','4.1.0','unversioned','ecommerce-app','9.6.0.27784')
 INSERT INTO "mendixsystem$sequence" VALUES('system$filedocument_fileid_mxseq','0f81688b-e719-4204-8f86-8fcd664a0992',1,0)
-INSERT INTO "mendixsystem$sequence" VALUES('salesmanager$sales_salesid_mxseq','2a0a5642-97bc-4964-9ed6-8760100c6361',1,0)
 INSERT INTO "mendixsystem$sequence" VALUES('excelimporter$template_nr_mxseq','2edfe01b-5194-4903-9624-6067fc0b4bb3',1,0)
 INSERT INTO "mendixsystem$sequence" VALUES('salesmanager$product__id_mxseq','338adc0f-469f-46d9-abca-4fcfbdc345bd',1,101)
 INSERT INTO "mendixsystem$sequence" VALUES('salesmanager$productcategory__id_mxseq','7712df0f-11be-486d-bea5-17525a0c52a3',1,5)
@@ -898,7 +897,7 @@ INSERT INTO "mendixsystem$entityidentifier" VALUES('1fd2e8a6-abc7-4b3d-90f1-531e
 INSERT INTO "mendixsystem$entityidentifier" VALUES('24a87b50-c3fb-4df1-b633-fc40801a1155',54,201)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('26f05bbe-7af2-417f-a578-e3c845de3267',60,1)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('274ac037-96c4-401c-add4-9808e993e309',50,1)
-INSERT INTO "mendixsystem$entityidentifier" VALUES('282e2e60-88a5-469d-84a5-ba8d9151644f',2,8201)
+INSERT INTO "mendixsystem$entityidentifier" VALUES('282e2e60-88a5-469d-84a5-ba8d9151644f',2,8601)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('2ae37bf5-ecb8-4c55-b967-d7383925b208',8,1)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('2d6e1228-0ec2-493a-975a-c8f52e4b0371',10,1)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('2f7c4632-cf12-44f0-b729-545e6a5bdc55',45,201)
@@ -906,7 +905,7 @@ INSERT INTO "mendixsystem$entityidentifier" VALUES('3078a23e-13b2-4a9b-84e4-2881
 INSERT INTO "mendixsystem$entityidentifier" VALUES('30834a21-e81c-4cbf-a10b-5f60f5fddc82',1,1)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('3729d27c-735b-457a-b210-9dffb125c3f3',42,1)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('37827192-315d-4ab6-85b8-f626f866ea76',16,1)
-INSERT INTO "mendixsystem$entityidentifier" VALUES('37f9fd49-5318-4c63-9a51-f761779b202f',37,8201)
+INSERT INTO "mendixsystem$entityidentifier" VALUES('37f9fd49-5318-4c63-9a51-f761779b202f',37,8601)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('399aeb7b-5008-48ed-8032-ddb46e78f7e8',24,1)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('3b6f5ca3-28d6-4581-b26e-7ce5bd0e6eeb',30,1)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('3d460fe3-2308-474b-8d3a-931ac838776f',9,1)
@@ -941,18 +940,18 @@ INSERT INTO "mendixsystem$entityidentifier" VALUES('9b26443c-f4bb-4252-aa62-9eaf
 INSERT INTO "mendixsystem$entityidentifier" VALUES('9f2c1aca-9a03-46f8-97ab-d4e43141a396',13,1)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('a11d9b16-c2f9-4ebd-affa-45f3cd8ff090',27,1)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('a5952592-bb2c-4798-9805-f9ff91ad97de',35,1)
-INSERT INTO "mendixsystem$entityidentifier" VALUES('aab0048f-d4ea-4fe9-a9cd-491c200a1b51',69,2701)
-INSERT INTO "mendixsystem$entityidentifier" VALUES('c519bcae-d827-4225-8b6b-028055423a1a',67,101)
+INSERT INTO "mendixsystem$entityidentifier" VALUES('aab0048f-d4ea-4fe9-a9cd-491c200a1b51',69,2901)
+INSERT INTO "mendixsystem$entityidentifier" VALUES('c519bcae-d827-4225-8b6b-028055423a1a',67,301)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('c6c131c8-8779-4213-9b26-a64e141f26a8',25,1)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('ce3860ff-2093-42cd-b462-8da7485fc01e',7,1)
-INSERT INTO "mendixsystem$entityidentifier" VALUES('d4154981-8dac-4150-aec5-efa3ef62a7a2',4,9001)
+INSERT INTO "mendixsystem$entityidentifier" VALUES('d4154981-8dac-4150-aec5-efa3ef62a7a2',4,9401)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('d5a9c4af-fd81-4ce4-99bc-cb22b0688e67',52,1)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('df86cd1e-f9ac-42d4-bcd0-a185540a247a',21,1)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('e09e866f-288b-475c-9465-792cde8b878c',19,1)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('e16243f1-d0ee-4cd2-90bf-dd5d1902c9b3',56,201)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('eb5c32a1-85ec-49d1-8bca-ecca779cd539',36,1)
 INSERT INTO "mendixsystem$entityidentifier" VALUES('f9818ad8-3214-4b1d-b837-3181863f5ed5',33,1)
-INSERT INTO "mendixsystem$properties" VALUES('Mendix.Runtime.DeploymentID','637711086805242876')
+INSERT INTO "mendixsystem$properties" VALUES('Mendix.Runtime.DeploymentID','637711181006435521')
 INSERT INTO "mendixsystem$properties" VALUES('oldFileMigrationCompleted','true')
 INSERT INTO "mendixsystem$unique_constraint" VALUES('uniq_administration$account_profileimage_administration$accountid','4288b13e-7029-4a3a-b02f-7216717b1615','6b13111f-605b-349f-b52d-999a2e4fc7a3')
 INSERT INTO "mendixsystem$unique_constraint" VALUES('uniq_administration$account_profileimage_administration$profileimageid','4288b13e-7029-4a3a-b02f-7216717b1615','0de82d84-573a-32ab-a749-182e67bfa951')
@@ -991,7 +990,7 @@ INSERT INTO "mendixsystem$unique_constraint" VALUES('uniq_mxmodelreflection$toke
 INSERT INTO "mendixsystem$unique_constraint" VALUES('uniq_mxmodelreflection$token_mxobjecttype_start_mxmodelreflection$tokenid','d3a4ad98-6fa9-4e41-a58f-ca7d9322a703','4d0de504-c71b-355a-8e34-99fc2d5bac4a')
 INSERT INTO "mendixsystem$unique_constraint" VALUES('uniq_mxmodelreflection$valuetype_mxobjecttype_mxmodelreflection$valuetypeid','a548d37c-2af1-4f15-ba9e-39a2b6bb54aa','a6f00954-dfcb-35e2-9d5e-2bc4e6e8c0b0')
 INSERT INTO "mendixsystem$unique_constraint" VALUES('uniq_salesmanager$product_productcategory_salesmanager$productid','af488bc1-7822-4928-a7af-ea16fa7d9aba','98bc2148-109e-380d-8d12-7fd2221118df')
-INSERT INTO "mendixsystem$unique_constraint" VALUES('uniq_salesmanager$sales_product_salesmanager$salesid','500c5f73-6ae5-4536-8943-47f424c186c9','f1085798-ed17-3d00-a6c9-0a266dca2608')
+INSERT INTO "mendixsystem$unique_constraint" VALUES('uniq_salesmanager$sales_account_salesmanager$salesid','5ad73ea5-f0c6-405d-b437-436828f7b174','bef7794f-a7d5-3e01-8132-d557b8c7700d')
 INSERT INTO "mendixsystem$unique_constraint" VALUES('uniq_system$backgroundjob_session_system$backgroundjobid','19892a2b-f17a-4c29-80c1-c81f8025b36c','60770e0f-201c-3f24-8a1e-d8b42a715ddb')
 INSERT INTO "mendixsystem$unique_constraint" VALUES('uniq_system$backgroundjob_xasinstance_system$backgroundjobid','fc3944c4-7a19-4a4d-9b0d-4a0c9d7aeb23','4fcadd5b-cfd5-3991-bdb8-19c4d63b1aa5')
 INSERT INTO "mendixsystem$unique_constraint" VALUES('uniq_system$offlinecreatedguids_guid','89cea6a8-a2df-4925-85e4-2b0c447e98c3','7919a281-0b72-4dc4-87e1-fffaced4c8d1')
@@ -1022,8 +1021,8 @@ INSERT INTO "mendixsystem$unique_constraint" VALUES('uniq_system$workflowusertas
 INSERT INTO "mendixsystem$unique_constraint" VALUES('uniq_system$workflowversion_previousversion_system$workflowversionid1','61a2af90-0720-41a0-bea9-8a3d60de71d0','a0f7479f-37c0-39ac-9fb9-5589bd8627c5')
 INSERT INTO "mendixsystem$unique_constraint" VALUES('uniq_system$workflowversion_workflowdefinition_system$workflowversionid','c063e3e7-a440-47f0-8065-6fac7c723690','47c7ac0f-8b15-3178-ae6c-8b0cb0debb61')
 INSERT INTO "system$user" VALUES(562949953421313,'Anonymous_0f1e0fba-21d4-4836-84f1-8a190eacfb26','{BCrypt}$2a$10$QwqKmgbSg9ZLz/u9dxfg/esyjGYuhzZMQaWTs.7.g0ZvkBWm9RCES','2021-10-16 12:12:43.369000',FALSE,TRUE,0,FALSE,TRUE,'2021-10-16 12:12:43.259000','2021-10-16 12:12:43.259000','System.User',NULL,562949953421313)
-INSERT INTO "system$user" VALUES(562949953421413,'MxAdmin','{BCrypt}$2a$10$Hoi1Dmz1ZYlMNin.9M.T0uT.ZEAkVKir4Key3/XEtDImz5Ou37zse',NULL,FALSE,TRUE,0,FALSE,FALSE,'2021-10-16 12:13:53.710000','2021-10-16 12:13:53.710000','System.User',NULL,562949953421413)
-INSERT INTO "system$user" VALUES(562949953421513,'demo_anonymous_user','{BCrypt}$2a$10$bKVRQl8t5bqX3jt4W49.e.QXqMsrAAAy/AYKzdz/bM02XqQR1rR.O',NULL,FALSE,TRUE,0,FALSE,FALSE,'2021-10-16 13:25:29.133000','2021-10-16 13:25:29.133000','System.User',NULL,562949953421513)
+INSERT INTO "system$user" VALUES(562949953421413,'MxAdmin','{BCrypt}$2a$10$h9CEWIQ8I13rtsZdFDk0U.wIZnvjg6fUHxM5fqlmtjAIndNP6r41i',NULL,FALSE,TRUE,0,FALSE,FALSE,'2021-10-16 12:13:53.710000','2021-10-16 12:13:53.710000','System.User',NULL,562949953421413)
+INSERT INTO "system$user" VALUES(562949953421513,'demo_anonymous_user','{BCrypt}$2a$10$bJiHQnt6.c34nTTj4Ul8YuGyMLKT8uzrQseX/Cj5U9i6rsVRa6qTK',NULL,FALSE,TRUE,0,FALSE,FALSE,'2021-10-16 13:25:29.133000','2021-10-16 13:25:29.133000','System.User',NULL,562949953421513)
 INSERT INTO "system$user" VALUES(562949953421613,'Anonymous_e1f21bd3-3d56-4e21-bb55-74920f0ce33a','{BCrypt}$2a$10$5tN7xq.ELEvIEa2VtKury.AKTpLKTXKZ.aV4aARIfjZwI6FsfMHva','2021-10-16 16:48:36.971000',FALSE,TRUE,0,FALSE,TRUE,'2021-10-16 16:48:36.853000','2021-10-16 16:48:36.853000','System.User',NULL,562949953421613)
 INSERT INTO "system$user" VALUES(562949953421713,'Anonymous_913c8ed9-83f1-4d6f-a91f-d7721294602a','{BCrypt}$2a$10$R.7uJUL6JJq04F7uYX2rOuxZBIl4hI91.cJSldjNEeg9AW.YzTjJq','2021-10-16 16:49:47.764000',FALSE,TRUE,0,FALSE,TRUE,'2021-10-16 16:49:47.678000','2021-10-16 16:49:47.678000','System.User',NULL,562949953421713)
 INSERT INTO "system$user" VALUES(562949953421813,'Anonymous_0b7a5625-42c2-40de-aced-107122bf433d','{BCrypt}$2a$10$OxFQiQA/9pdPZnEglCVJgOC5zY.POuDAHpteTWwUvu4Cyx0E3A9uu','2021-10-16 17:35:38.678000',FALSE,TRUE,0,FALSE,TRUE,'2021-10-16 17:35:38.585000','2021-10-16 17:35:38.585000','System.User',NULL,562949953421813)
@@ -1042,8 +1041,8 @@ INSERT INTO "system$user" VALUES(562949953424814,'Anonymous_32d39d37-6e70-47c1-9
 INSERT INTO "system$user" VALUES(562949953425413,'Anonymous_aedf5a0a-db6e-4e4d-94bb-25d36a070952','{BCrypt}$2a$10$lnAFBcXgjlHo6m/BmqY4mel5U9yWkHtyrvHFvVgOnb8ZF1wi1lQEq','2021-10-23 17:52:03.705000',FALSE,TRUE,0,FALSE,TRUE,'2021-10-23 17:52:03.617000','2021-10-23 17:52:03.617000','System.User',NULL,562949953425413)
 INSERT INTO "system$user" VALUES(562949953426913,'Anonymous_34d3a7ac-4f60-45e6-baa0-f1be8dd4ef2d','{BCrypt}$2a$10$/bw0ATSz3YqC0yYtDubYYepeq14TPgnVO6DNyJHJTTa1ZTTYTk1Y6','2021-10-26 17:41:21.302000',FALSE,TRUE,0,FALSE,TRUE,'2021-10-26 17:41:21.214000','2021-10-26 17:41:21.214000','System.User',NULL,562949953426913)
 INSERT INTO "system$user" VALUES(562949953427213,'Anonymous_0d17d538-d431-4149-b9f3-d4e2669418cb','{BCrypt}$2a$10$ffOpsmoo3abQd3ZGOfTrQeioh3jrfCcXsxNGVBWKEHfiPSu4Q02w6','2021-10-26 18:55:48.857000',FALSE,TRUE,0,FALSE,TRUE,'2021-10-26 18:55:48.766000','2021-10-26 18:55:48.766000','System.User',NULL,562949953427213)
-INSERT INTO "system$user" VALUES(5066549580791809,'demo_administrator','{BCrypt}$2a$10$gJdF53xw0PBTa0QS8B4i4eb4eyq4f2clUOpFAG9/KVeRyoANbc42y','2021-10-29 09:51:39.449000',FALSE,TRUE,0,FALSE,FALSE,'2021-10-16 12:13:53.173000','2021-10-29 10:23:29.359000','Administration.Account',5066549580791809,5066549580791809)
-INSERT INTO "system$user" VALUES(5066549580791810,'demo_user','{BCrypt}$2a$10$vcNx8BEiDVU0UD8fSpGCgedu8rKpK4qJJ59eLkZxzXUpqJsGQli8.','2021-10-22 14:47:00.987000',FALSE,TRUE,2,FALSE,FALSE,'2021-10-16 12:13:53.298000','2021-10-29 09:51:31.962000','Administration.Account',5066549580791810,5066549580791810)
+INSERT INTO "system$user" VALUES(5066549580791809,'demo_administrator','{BCrypt}$2a$10$rLzfctXXyHrx31cJnh7.Ce77UBJZ0nJxKzGZ2W9noudH0PZd0cAmi','2021-10-29 12:28:39.066000',FALSE,TRUE,0,FALSE,FALSE,'2021-10-16 12:13:53.173000','2021-10-29 12:33:17.915000','Administration.Account',5066549580791809,5066549580791809)
+INSERT INTO "system$user" VALUES(5066549580791810,'demo_user','{BCrypt}$2a$10$ZpFVbPDfm3GR6V0Fz4Qr1.rEa4ALMW8FfX.jR3XIx2/YV4Liu.80S','2021-10-22 14:47:00.987000',FALSE,TRUE,2,FALSE,FALSE,'2021-10-16 12:13:53.298000','2021-10-29 12:28:31.320000','Administration.Account',5066549580791810,5066549580791810)
 INSERT INTO "system$user" VALUES(5066549580791910,'tarik','{BCrypt}$2a$10$/GUy5LQ717pSTlIITWrkuO5RgEnqvHNUlIrr8eta9uZWDy9EG3tY.','2021-10-26 13:29:34.805000',FALSE,TRUE,0,FALSE,FALSE,'2021-10-17 13:18:00.140000','2021-10-26 13:29:34.808000','Administration.Account',5066549580791910,5066549580791910)
 INSERT INTO "system$user" VALUES(5066549580792010,'tarik1','{BCrypt}$2a$10$rU/XkvSy49jBbW1QGP1OkOp3DUsJjXMdDYVl2MEsjYohgsq0sPzCy',NULL,FALSE,TRUE,0,FALSE,FALSE,'2021-10-17 15:29:55.480000','2021-10-17 15:29:55.548000','Administration.Account',562949953422713,5066549580792010)
 INSERT INTO "system$user" VALUES(5066549580792109,'tarik2','{BCrypt}$2a$10$x1yfn8K48Az1GBxki6U19eKN9OYZMsYvm3pNR9hE7N6jpMnEghVzy',NULL,FALSE,TRUE,0,FALSE,FALSE,'2021-10-17 18:42:50.152000','2021-10-17 18:42:50.226000','Administration.Account',562949953422813,5066549580792109)
@@ -1641,8 +1640,8 @@ INSERT INTO "system$filedocument" VALUES(12384898975268866,26,'profile image.jpg
 INSERT INTO "system$filedocument" VALUES(12384898975268965,31,NULL,FALSE,NULL,FALSE,0,0,NULL,'2021-10-29 01:28:46.907000','2021-10-29 01:28:46.907000','Administration.ProfileImage',5066549580791809,5066549580791809)
 INSERT INTO "system$filedocument" VALUES(15762598695796737,29,'Products.xlsx',FALSE,NULL,TRUE,13359,0,'03d50e21-ad3c-4d66-841d-f214e4574e92','2021-10-23 17:58:02.283000','2021-10-23 17:58:24.342000','ExcelImporter.TemplateDocument',5066549580791809,5066549580791809)
 INSERT INTO "system$filedocument" VALUES(15762598695796837,30,'ProductCategories.xlsx',FALSE,NULL,TRUE,9633,0,'dade0b2d-64aa-4e3a-8e10-0e4bcf274e0d','2021-10-26 17:39:10.120000','2021-10-26 17:39:32.125000','ExcelImporter.TemplateDocument',5066549580791809,5066549580791809)
-INSERT INTO "system$session" VALUES(10414574138302373,'5a9825f1-82df-4aee-adbd-aad806f5dea6','db5da801-5cff-4ba7-a1ea-64c9547a4c05','2021-10-29 11:14:10.986000',FALSE,'7c6277ae-840f-4bac-9454-cd02f2ca8126',NULL,'2021-10-29 09:51:33.447000')
-INSERT INTO "system$session_user" VALUES(10414574138302373,5066549580791809)
+INSERT INTO "system$session" VALUES(10414574138302773,'568496fe-36fc-4a7d-a5e9-f9ec3d1349f9','90bd657c-d448-49b6-a73b-6e1a9a04535a','2021-10-29 12:40:40.985000',FALSE,'899ef9bd-bfcb-40dc-a6ae-0cf3b721b6e6','2021-10-29 12:31:52.976000','2021-10-29 12:28:32.749000')
+INSERT INTO "system$session_user" VALUES(10414574138302773,5066549580791809)
 INSERT INTO "system$autocommitentry" VALUES(11258999068426441,'e0d884f6-f8e5-406f-984d-d464898497cd',12384898975268965,'2021-10-29 01:28:46.926000')
 INSERT INTO "system$language" VALUES(11540474045136897,'en_US','English, United States')
 INSERT INTO "administration$profileimage" VALUES(12384898975268866)
@@ -1890,6 +1889,10 @@ INSERT INTO "mxmodelreflection$mxobjecttype_module" VALUES(18577348462903297,171
 INSERT INTO "mxmodelreflection$mxobjecttype_module" VALUES(18577348462903397,17169973579350024)
 INSERT INTO "mxmodelreflection$mxobjecttype_module" VALUES(18577348462903398,17169973579350024)
 INSERT INTO "mxmodelreflection$mxobjecttype_module" VALUES(18577348462903497,17169973579350024)
+INSERT INTO "salesmanager$sales" VALUES(18858823439614158,'Multiple Categories',11)
+INSERT INTO "salesmanager$sales_product" VALUES(18858823439614158,18295873486192641)
+INSERT INTO "salesmanager$sales_product" VALUES(18858823439614158,18295873486192642)
+INSERT INTO "salesmanager$sales_product" VALUES(18858823439614158,18295873486192643)
 INSERT INTO "salesmanager$product_productcategory" VALUES(18295873486192641,19703248369745924)
 INSERT INTO "salesmanager$product_productcategory" VALUES(18295873486192642,19703248369745921)
 INSERT INTO "salesmanager$product_productcategory" VALUES(18295873486192643,19703248369745921)
@@ -1996,3 +1999,4 @@ INSERT INTO "salesmanager$productcategory" VALUES(19703248369745922,'Clothing, S
 INSERT INTO "salesmanager$productcategory" VALUES(19703248369745923,'Collectibles & Fine Art',3)
 INSERT INTO "salesmanager$productcategory" VALUES(19703248369745924,'Computers',4)
 INSERT INTO "salesmanager$productcategory" VALUES(19703248369745925,'Electronics',5)
+INSERT INTO "salesmanager$sales_account" VALUES(18858823439614158,5066549580791809)
