@@ -5,3 +5,12 @@
 .selected-product {
   background-color: rgb(197, 236, 223);
 }
+
+.checkout-product {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+  background-color: white;
+}

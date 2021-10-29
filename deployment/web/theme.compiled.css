@@ -23271,4 +23271,13 @@ div:not(.table-compact) > .table .th .dropdown-container .dropdown-list {
   background-color: #c5ecdf;
 }
 
+.checkout-product {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+  background-color: white;
+}
+
 /*# sourceMappingURL=theme.compiled.css.map */
