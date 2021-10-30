@@ -1,1 +1,1 @@
-define(["SprintrFeedbackWidget/SprintrFeedback"], {});
+define(["SprintrFeedbackWidget/SprintrFeedback", "HTMLSnippet/widget/HTMLSnippet", "HTMLSnippet/widget/HTMLSnippetContext"], {});
