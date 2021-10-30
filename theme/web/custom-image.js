@@ -11,6 +11,8 @@ for (let item of images) {
     let name = context.trackObject.jsonData.attributes.ProductName.value;
     let price = context.trackObject.jsonData.attributes.SalePrice.value;
     let id = context.trackObject.jsonData.attributes._Id.value;
+    //let category = context.trackObject.jsonData.attributes.ProductCategory.value;
+    console.warn(context);
 
     //console.warn(name, price, id);
 
@@ -22,7 +24,25 @@ for (let item of images) {
 
     rootDiv.insertAdjacentHTML(
       "afterbegin",
-      `<div id = ${id} class = "popup-product"> ${name}</div>`
+      `<div id = ${id} class = "popup-product"> 
+      <div class="product-card">
+      <div class="badge">Hot</div>    
+      <div class="product-details">
+          <span class="product-catagory">Product Category</span>
+          <h4><a href="">${name}</a></h4>
+          <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Vero, possimus nostrum!</p>
+          <div class="product-bottom-details">
+              <div class="product-price"><small>${Math.floor(
+                Math.random() * 1000
+              ).toString()}$</small>${price}$</div>
+              <div class="product-links">
+                  <a href=""><i class="fa fa-heart"></i></a>
+                  <a href=""><i class="fa fa-shopping-cart"></i></a>
+              </div>
+          </div>
+      </div>
+  </div>
+      </div>`
     );
 
     let popup = document.getElementById(id);
