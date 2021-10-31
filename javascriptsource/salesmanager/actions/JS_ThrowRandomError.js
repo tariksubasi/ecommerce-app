@@ -8,6 +8,19 @@
 import { Big } from "big.js";
 
 // BEGIN EXTRA CODE
+async function waitFiveSecond() {
+	let randomNumber = Math.floor(Math.random() * 100);
+	return new Promise((resolve, reject) => {
+		setTimeout(() => {
+			if (randomNumber) {
+				mx.ui.error("Something went wrong." + " " + randomNumber.toString());
+				return resolve(true);
+			}
+			return reject(new Error("random number couldn't be generated."))
+		}, 5000)
+	})
+}
+
 // END EXTRA CODE
 
 /**
@@ -15,7 +28,7 @@ import { Big } from "big.js";
  */
 export async function JS_ThrowRandomError() {
 	// BEGIN USER CODE
-	let randomNumber = Math.floor(Math.random() * 100);
-	mx.ui.error("Something went wrong." + " " + randomNumber.toString());
+	const result = await waitFiveSecond();
+	return result;
 	// END USER CODE
 }
