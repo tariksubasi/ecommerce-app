@@ -23,6 +23,7 @@ public class Account extends system.proxies.User
 		Gender("Gender"),
 		SurName("SurName"),
 		FirstName("FirstName"),
+		_Id("_Id"),
 		Name("Name"),
 		Password("Password"),
 		LastLogin("LastLogin"),
@@ -352,6 +353,42 @@ public class Account extends system.proxies.User
 	public final void setFirstName(com.mendix.systemwideinterfaces.core.IContext context, java.lang.String firstname)
 	{
 		getMendixObject().setValue(context, MemberNames.FirstName.toString(), firstname);
+	}
+
+	/**
+	 * @return value of _Id
+	 */
+	public final java.lang.Long get_Id()
+	{
+		return get_Id(getContext());
+	}
+
+	/**
+	 * @param context
+	 * @return value of _Id
+	 */
+	public final java.lang.Long get_Id(com.mendix.systemwideinterfaces.core.IContext context)
+	{
+		return (java.lang.Long) getMendixObject().getValue(context, MemberNames._Id.toString());
+	}
+
+	/**
+	 * Set value of _Id
+	 * @param _id
+	 */
+	public final void set_Id(java.lang.Long _id)
+	{
+		set_Id(getContext(), _id);
+	}
+
+	/**
+	 * Set value of _Id
+	 * @param context
+	 * @param _id
+	 */
+	public final void set_Id(com.mendix.systemwideinterfaces.core.IContext context, java.lang.Long _id)
+	{
+		getMendixObject().setValue(context, MemberNames._Id.toString(), _id);
 	}
 
 	/**
