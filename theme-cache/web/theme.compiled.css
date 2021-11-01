@@ -23263,7 +23263,7 @@ div:not(.table-compact) > .table .th .dropdown-container .dropdown-list {
   padding: 5%;
 }
 
-.mx-image-viewer {
+li .mx-image-viewer {
   width: 50px !important;
 }
 
@@ -23401,6 +23401,13 @@ div:not(.table-compact) > .table .th .dropdown-container .dropdown-list {
 
 .product-links a:hover {
   color: #fbb72c;
+}
+
+.product-detail-wrapper {
+  background-color: white;
+  margin-top: 50px;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  width: 70%;
 }
 
 /*# sourceMappingURL=theme.compiled.css.map */
