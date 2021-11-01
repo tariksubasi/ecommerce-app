@@ -12,7 +12,6 @@ for (let item of images) {
     let price = context.trackObject.jsonData.attributes.SalePrice.value;
     let id = context.trackObject.jsonData.attributes._Id.value;
     //let category = context.trackObject.jsonData.attributes.ProductCategory.value;
-    console.warn(context);
 
     //console.warn(name, price, id);
 
@@ -58,4 +57,12 @@ for (let item of images) {
     if (!popup) return;
     popup.remove();
   });
+
+  item.addEventListener("click", (e) => {
+    let popup = document.getElementsByClassName("popup-product")[0];
+    if (!popup) return;
+    popup.remove();
+  });
+
+
 }

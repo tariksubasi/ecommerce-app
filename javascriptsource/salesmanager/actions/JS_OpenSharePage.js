@@ -16,15 +16,15 @@ import { Big } from "big.js";
 export async function JS_OpenSharePage() {
 	// BEGIN USER CODE
 	return new Promise((resolve, reject) => {
-		mx.ui.openForm("SalesManager/Share_Web.page.xml", {
-			location: "popup",
-			callback: function (form) {
-				let close = document.getElementsByClassName("close")[0];
-				close.remove();
-				let share = document.getElementsByClassName("share")[0];
-				share.remove();
-			}
-		});
+			mx.ui.openForm("SalesManager/Share_Web.page.xml", {
+				location: "popup",
+				callback: function (form) {
+					let close = document.getElementsByClassName("close")[0];
+					close.remove();
+					let share = document.getElementsByClassName("share")[0];
+					share.remove();		
+				}
+			});	
 	})
 	// END USER CODE
 }
