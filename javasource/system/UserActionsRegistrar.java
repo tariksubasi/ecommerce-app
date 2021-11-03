@@ -7,6 +7,7 @@ public class UserActionsRegistrar
   public void registerActions(IActionRegistrator registrator)
   {
     registrator.bundleComponentLoaded();
+    registrator.registerUserAction(anonymous.actions.JA_Multiply.class);
     registrator.registerUserAction(excelimporter.actions.GetHeaderInformationFromExcelFile.class);
     registrator.registerUserAction(excelimporter.actions.RefreshClass.class);
     registrator.registerUserAction(excelimporter.actions.StartImportByTemplate.class);

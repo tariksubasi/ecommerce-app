@@ -15,6 +15,12 @@ import com.mendix.systemwideinterfaces.core.IMendixObject;
 public class Microflows
 {
 	// These are the microflows for the Anonymous module
+	public static void aCT_MultiplyWithJava(IContext context, anonymous.proxies.Multiply _multiply)
+	{
+		Map<java.lang.String, Object> params = new HashMap<>();
+		params.put("Multiply", _multiply == null ? null : _multiply.getMendixObject());
+		Core.microflowCall("Anonymous.ACT_MultiplyWithJava").withParams(params).execute(context);
+	}
 	public static void aCT_RegisterUser(IContext context, anonymous.proxies.Anonymous _anonymous)
 	{
 		Map<java.lang.String, Object> params = new HashMap<>();
@@ -26,5 +32,11 @@ public class Microflows
 		Map<java.lang.String, Object> params = new HashMap<>();
 		IMendixObject result = (IMendixObject)Core.microflowCall("Anonymous.DS_Anonymous").withParams(params).execute(context);
 		return result == null ? null : anonymous.proxies.Anonymous.initialize(context, result);
+	}
+	public static anonymous.proxies.Multiply dS_Multiply(IContext context)
+	{
+		Map<java.lang.String, Object> params = new HashMap<>();
+		IMendixObject result = (IMendixObject)Core.microflowCall("Anonymous.DS_Multiply").withParams(params).execute(context);
+		return result == null ? null : anonymous.proxies.Multiply.initialize(context, result);
 	}
 }
