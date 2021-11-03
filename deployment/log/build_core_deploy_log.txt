@@ -2,7 +2,7 @@ Buildfile: C:\Users\tarik\Documents\Mendix\ecommerce-app-main\deployment\build_c
 
 deploy:
      [copy] Copying 41 files to C:\Users\tarik\Documents\Mendix\ecommerce-app-main\deployment
-     [copy] Copying 22 files to C:\Users\tarik\Documents\Mendix\ecommerce-app-main\deployment\model\lib\userlib
+     [copy] Copying 48 files to C:\Users\tarik\Documents\Mendix\ecommerce-app-main\deployment\model\lib\userlib
      [copy] Copying 5 files to C:\Users\tarik\Documents\Mendix\ecommerce-app-main\deployment\model\resources
 
 BUILD SUCCESSFUL
