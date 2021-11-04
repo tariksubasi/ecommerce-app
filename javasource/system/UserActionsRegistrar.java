@@ -110,6 +110,7 @@ public class UserActionsRegistrar
     registrator.registerUserAction(mxmodelreflection.actions.SyncObjects.class);
     registrator.registerUserAction(mxmodelreflection.actions.TestThePattern.class);
     registrator.registerUserAction(mxmodelreflection.actions.ValidateTokensInMessage.class);
+    registrator.registerUserAction(salesmanager.actions.JA_CalculateScore.class);
     registrator.registerUserAction(salesmanager.actions.JA_CommitWarehouse.class);
     registrator.registerUserAction(salesmanager.actions.JA_GenerateSalesId.class);
     registrator.registerUserAction(salesmanager.actions.JA_SetShare.class);
