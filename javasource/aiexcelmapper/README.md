@@ -99,6 +99,41 @@ Sampling bir optimizasyon olarak ele alinir: dosya yoksa, bos ise, sheet
 numarasi tutmuyorsa, 25MB'tan buyukse veya POI classpath'te degilse action
 **patlamaz** — uyari yazar ve header-only devam eder.
 
+## Karakter kodlamasi
+
+Java dosyasi **tamamen ASCII**. Turkce harf iceren tek yer harf katlama tablosuydu,
+o da artik kod noktasiyla yaziliyor (`case 0x0130:` gibi). Sebebi: Turkce Windows'ta
+javac varsayilan olarak windows-1254 kullanir, Mendix dosyayi UTF-8 yazar, ve
+dosyada Turkce karakter varsa "unmappable character" hatasi alirsin. Dosya
+`-encoding US-ASCII` ve `-encoding windows-1254` ile ayri ayri derlenerek dogrulandi.
+
+Kod yazarken dikkat: Java'da `\u` **yorum satirinda bile** lexer tarafindan unicode
+escape olarak islenir. Yoruma `\uXXXX` yazarsan "illegal unicode escape" alirsin.
+Cift ters bolu (`\\u`) guvenli.
+
+Calisma aninda da iki koruma var:
+
+- **Giden istek**: JSON yazici ASCII disindaki her karakteri `\uXXXX` olarak
+  kaciriyor, yani request body JVM'den saf ASCII olarak cikiyor. Aradaki hicbir
+  gateway, proxy veya log Turkce karakteri bozamiyor. Model zarfi acinca escape
+  cozuluyor ve basligi dogru goruyor.
+- **Gelen cevap**: `Content-Type` basligindaki charset dikkate aliniyor.
+  Gateway windows-1254 veya ISO-8859-9 donerse UTF-8 varsayip bozmuyor.
+
+## Studio Pro proxy alani
+
+Entity tipli bir Object parametresi icin Studio Pro iki alan uretir:
+
+```java
+private IMendixObject __TemplateObject;                  // ham obje
+private excelimporter.proxies.Template TemplateObject;   // proxy
+```
+
+Kullanici kodu bilerek **`__TemplateObject`** kullaniyor. Aksi halde Studio Pro
+dosyayi yeniden urettiginde `TemplateObject` proxy tipine donusur ve
+"incompatible types" derleme hatasi alirsin. Bu haliyle dosya hem oldugu gibi,
+hem de Studio Pro proxy alanini ekledikten sonra derleniyor.
+
 ## Surum bagimsizligi
 
 Excel Importer ve Mx Model Reflection major surumler arasinda member isimlerini

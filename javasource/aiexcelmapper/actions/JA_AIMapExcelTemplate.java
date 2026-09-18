@@ -48,8 +48,15 @@ import com.mendix.systemwideinterfaces.core.UserAction;
  */
 public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 {
-	/** ExcelImporter.Template to map. */
-	private IMendixObject TemplateObject;
+	/**
+	 * ExcelImporter.Template to map.
+	 *
+	 * Studio Pro generates two fields for an entity-typed Object parameter: this raw
+	 * __TemplateObject and a proxy-typed TemplateObject beside it. The user code below
+	 * deliberately uses the raw one, so the file compiles both as written here and after
+	 * Studio Pro regenerates it with the proxy field added.
+	 */
+	private IMendixObject __TemplateObject;
 	/** Full chat/completions URL, e.g. https://host/api/chat/completions */
 	private java.lang.String Endpoint;
 	/** Bearer token. May be empty for unauthenticated internal gateways. */
@@ -72,7 +79,7 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 	public JA_AIMapExcelTemplate(IContext context, IMendixObject TemplateObject, java.lang.String Endpoint, java.lang.String ApiKey, java.lang.String ModelName, java.math.BigDecimal MinConfidence, java.lang.String DefaultDateFormat, java.lang.Boolean OverwriteExisting, java.lang.Boolean DryRun, java.lang.Long TimeoutSeconds, java.lang.Long SampleRowCount)
 	{
 		super(context);
-		this.TemplateObject = TemplateObject;
+		this.__TemplateObject = TemplateObject;
 		this.Endpoint = Endpoint;
 		this.ApiKey = ApiKey;
 		this.ModelName = ModelName;
@@ -99,7 +106,7 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 		cfg.timeoutSeconds    = this.TimeoutSeconds == null ? 120 : this.TimeoutSeconds.intValue();
 		cfg.sampleRowCount    = this.SampleRowCount == null ? 5 : this.SampleRowCount.intValue();
 
-		return new Mapper(getContext(), this.TemplateObject, cfg).run();
+		return new Mapper(getContext(), this.__TemplateObject, cfg).run();
 		// END USER CODE
 	}
 
@@ -247,7 +254,11 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 				case '\b': sb.append("\\b");  break;
 				case '\f': sb.append("\\f");  break;
 				default:
-					if (c < 0x20)
+					// Anything outside printable ASCII is written as a \\uXXXX escape, which
+					// every JSON parser accepts. The request body therefore leaves this JVM
+					// as pure ASCII and no gateway, proxy or log along the way can mangle a
+					// Turkish character on its way to the model.
+					if (c < 0x20 || c > 0x7E)
 						sb.append(String.format(Locale.ROOT, "\\u%04x", (int) c));
 					else
 						sb.append(c);
@@ -729,7 +740,8 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 
 				Response r = new Response();
 				r.status = conn.getResponseCode();
-				r.body = readAll(r.status >= 400 ? conn.getErrorStream() : conn.getInputStream());
+				r.body = readAll(r.status >= 400 ? conn.getErrorStream() : conn.getInputStream(),
+						charsetOf(conn.getHeaderField("Content-Type")));
 				r.retryAfterMillis = parseRetryAfter(conn.getHeaderField("Retry-After"));
 				return r;
 			}
@@ -739,7 +751,7 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 			}
 		}
 
-		private static String readAll(InputStream in) throws IOException
+		private static String readAll(InputStream in, java.nio.charset.Charset charset) throws IOException
 		{
 			if (in == null)
 				return "";
@@ -750,12 +762,43 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 				int read;
 				while ((read = in.read(buffer)) != -1)
 					out.write(buffer, 0, read);
-				return new String(out.toByteArray(), StandardCharsets.UTF_8);
+				return new String(out.toByteArray(), charset);
 			}
 			finally
 			{
 				in.close();
 			}
+		}
+
+		/**
+		 * Decodes the reply with the charset the gateway declares rather than assuming
+		 * UTF-8. A gateway on a Turkish stack can answer in windows-1254 or ISO-8859-9,
+		 * and reading that as UTF-8 corrupts every accented attribute name it echoes back.
+		 */
+		static java.nio.charset.Charset charsetOf(String contentType)
+		{
+			if (contentType != null)
+			{
+				int at = contentType.toLowerCase(Locale.ROOT).indexOf("charset=");
+				if (at >= 0)
+				{
+					String name = contentType.substring(at + "charset=".length()).trim();
+					int semicolon = name.indexOf(';');
+					if (semicolon >= 0)
+						name = name.substring(0, semicolon).trim();
+					if (name.startsWith("\"") && name.endsWith("\"") && name.length() > 1)
+						name = name.substring(1, name.length() - 1);
+					try
+					{
+						return java.nio.charset.Charset.forName(name);
+					}
+					catch (RuntimeException ex)
+					{
+						// Unknown or malformed charset name: UTF-8 is the JSON default.
+					}
+				}
+			}
+			return StandardCharsets.UTF_8;
 		}
 
 		private static long parseRetryAfter(String header)
@@ -2226,14 +2269,23 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 			for (int i = 0; i < value.length(); i++)
 			{
 				char c = value.charAt(i);
+				// Code points rather than literal letters: this file stays pure ASCII so it
+				// compiles identically whatever platform encoding javac picks up.
 				switch (c)
 				{
-				case 'I': case 'İ': case 'ı': c = 'i'; break; // I, dotted I, dotless i
-				case 'Ş': case 'ş': c = 's'; break;           // S with cedilla
-				case 'Ğ': case 'ğ': c = 'g'; break;           // G with breve
-				case 'Ü': case 'ü': c = 'u'; break;           // U with diaeresis
-				case 'Ö': case 'ö': c = 'o'; break;           // O with diaeresis
-				case 'Ç': case 'ç': c = 'c'; break;           // C with cedilla
+				case 'I':                       // LATIN CAPITAL LETTER I
+				case 0x0130:                    // LATIN CAPITAL LETTER I WITH DOT ABOVE
+				case 0x0131: c = 'i'; break;    // LATIN SMALL LETTER DOTLESS I
+				case 0x015E:                    // LATIN CAPITAL LETTER S WITH CEDILLA
+				case 0x015F: c = 's'; break;    // LATIN SMALL LETTER S WITH CEDILLA
+				case 0x011E:                    // LATIN CAPITAL LETTER G WITH BREVE
+				case 0x011F: c = 'g'; break;    // LATIN SMALL LETTER G WITH BREVE
+				case 0x00DC:                    // LATIN CAPITAL LETTER U WITH DIAERESIS
+				case 0x00FC: c = 'u'; break;    // LATIN SMALL LETTER U WITH DIAERESIS
+				case 0x00D6:                    // LATIN CAPITAL LETTER O WITH DIAERESIS
+				case 0x00F6: c = 'o'; break;    // LATIN SMALL LETTER O WITH DIAERESIS
+				case 0x00C7:                    // LATIN CAPITAL LETTER C WITH CEDILLA
+				case 0x00E7: c = 'c'; break;    // LATIN SMALL LETTER C WITH CEDILLA
 				default: c = Character.toLowerCase(c);
 				}
 				if (Character.isLetterOrDigit(c))
