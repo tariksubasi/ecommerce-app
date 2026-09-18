@@ -1060,6 +1060,9 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 
 	static final class Schema
 	{
+		/** Printed in errors and in the report, so a screenshot identifies the build. */
+		static final String BUILD = "schema-r4";
+
 		static final String E_TEMPLATE = "ExcelImporter.Template";
 		static final String E_COLUMN   = "ExcelImporter.Column";
 		static final String E_DOCUMENT = "ExcelImporter.TemplateDocument";
@@ -1124,15 +1127,25 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 			s.templateSheetIndex   = s.attribute(context, template, "SheetIndex", "Sheet", "SheetNumber");
 			s.templateFirstDataRow = s.attribute(context, template, "FirstDataRowNumber", "FirstDataRow", "DataRowNumber");
 
-			s.columnTemplate   = s.associationName(E_COLUMN, templateType, new String[] { "Column_Template" });
-			s.columnObjectType = s.associationName(E_COLUMN, E_OBJTYPE, new String[] { "Column_MxObjectType" });
-			s.columnMember     = s.associationName(E_COLUMN, E_MEMBER, new String[] { "Column_MxObjectMember" });
-			s.memberObjectType = s.associationName(E_MEMBER, E_OBJTYPE, new String[] { "MxObjectMember_MxObjectType" });
-			s.documentTemplate = s.associationName(E_DOCUMENT, templateType, new String[] { "TemplateDocument_Template" });
+			// These live on entities we have no instance of yet, and the column query
+			// needs one of them before any column can be read. Borrowing any single
+			// existing instance lets them be resolved from a real member list too,
+			// rather than from the metamodel alone.
+			IMendixObject anyColumn = s.anyInstance(context, E_COLUMN);
+			s.columnTemplate   = s.resolveOn(context, anyColumn, E_COLUMN, templateType, "Column_Template", "the owning template");
+			s.columnObjectType = s.resolveOn(context, anyColumn, E_COLUMN, E_OBJTYPE, "Column_MxObjectType", "the main entity");
+			s.columnMember     = s.resolveOn(context, anyColumn, E_COLUMN, E_MEMBER, "Column_MxObjectMember", "the mapped attribute");
+
+			IMendixObject anyMember = s.anyInstance(context, E_MEMBER);
+			s.memberObjectType = s.resolveOn(context, anyMember, E_MEMBER, E_OBJTYPE, "MxObjectMember_MxObjectType", "the owning entity");
+
+			IMendixObject anyDocument = s.anyInstance(context, E_DOCUMENT);
+			s.documentTemplate = s.resolveOn(context, anyDocument, E_DOCUMENT, templateType, "TemplateDocument_Template", "the sample file link");
 
 			if (s.columnTemplate == null)
 				throw new MappingException("Could not find the association from " + E_COLUMN + " to " + templateType
-						+ ". This action adapts to the Excel Importer domain model at runtime, but nothing matched.");
+						+ ". This action adapts to the Excel Importer domain model at runtime, but nothing matched. ["
+						+ BUILD + "]");
 			return s;
 		}
 
@@ -1178,6 +1191,46 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 
 		// -- resolution primitives ----------------------------------------------------
 
+		/**
+		 * Any one instance of an entity, used purely to read its member names. Returns
+		 * null when none exists or the user cannot read them, in which case resolution
+		 * falls back to the metamodel and then to the module-qualified convention.
+		 */
+		private IMendixObject anyInstance(IContext context, String entity)
+		{
+			try
+			{
+				List<IMendixObject> found = Core.retrieveXPathQuery(context, "//" + entity,
+						1, 0, new HashMap<String, String>());
+				return found == null || found.isEmpty() ? null : found.get(0);
+			}
+			catch (Exception ex)
+			{
+				return null;
+			}
+		}
+
+		/** Resolves one association, with or without an instance to inspect. */
+		private String resolveOn(IContext context, IMendixObject sample, String ownerEntity, String targetEntity,
+				String preferred, String what) throws MappingException
+		{
+			String[] candidates = { preferred };
+			if (sample != null)
+			{
+				String resolved = association(context, sample, ownerEntity, targetEntity, candidates, what);
+				if (resolved != null)
+					return resolved;
+			}
+			String discovered = associationName(ownerEntity, targetEntity, candidates);
+			if (discovered != null)
+				return discovered;
+
+			// Nothing to inspect and no metamodel answer: fall back to how Mendix names
+			// an association member, so the query at least fails with a readable name.
+			String[] variants = qualifiedVariants(candidates, ownerEntity);
+			return variants.length > 0 ? variants[0] : preferred;
+		}
+
 		/** Discovery first, since only the metamodel knows the module a member is qualified with. */
 		private String association(IContext context, IMendixObject sample, String ownerEntity, String targetEntity,
 				String[] preferred, String what) throws MappingException
@@ -1190,7 +1243,46 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 							+ "' (expected '" + preferred[0] + "').");
 				return discovered;
 			}
-			return firstPresent(sample, qualifiedVariants(preferred, ownerEntity));
+
+			String direct = firstPresent(sample, qualifiedVariants(preferred, ownerEntity));
+			if (direct != null)
+				return direct;
+
+			// Last resort, and the one that cannot be defeated by a naming convention:
+			// match against the member list the object itself reports.
+			return memberLike(context, sample, preferred, what);
+		}
+
+		/**
+		 * Matches a preferred name against the members the object actually has, ignoring
+		 * the module prefix and then letter case. This needs neither the metamodel nor a
+		 * guess at which module qualifies the member, so it holds when everything else
+		 * fails. Comparison is on the whole short name, so Column_MxObjectMember never
+		 * matches Column_MxObjectMember_Reference.
+		 */
+		private String memberLike(IContext context, IMendixObject sample, String[] preferred, String what)
+		{
+			List<String> actual = memberNames(context, sample);
+			for (String candidate : preferred)
+			{
+				for (String name : actual)
+					if (name.equals(candidate))
+						return name;
+				for (String name : actual)
+					if (shortName(name).equals(candidate))
+						return note(what, sample, candidate, name);
+				for (String name : actual)
+					if (shortName(name).equalsIgnoreCase(candidate))
+						return note(what, sample, candidate, name);
+			}
+			return null;
+		}
+
+		private String note(String what, IMendixObject sample, String candidate, String actual)
+		{
+			notes.add("Matched " + what + " on " + sample.getType() + " to member '" + actual
+					+ "' by name (looked for '" + candidate + "').");
+			return actual;
 		}
 
 		/**
@@ -1274,6 +1366,15 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 				return false;
 			if (a.equals(b))
 				return true;
+
+			// The metamodel may report an entity unqualified while our constant carries
+			// its module. Compare short names only when exactly one side is qualified,
+			// so two same-named entities in different modules are still told apart.
+			boolean aQualified = a.indexOf('.') >= 0;
+			boolean bQualified = b.indexOf('.') >= 0;
+			if (aQualified != bQualified && shortName(a).equals(shortName(b)))
+				return true;
+
 			try
 			{
 				return Core.isSubClassOf(a, b) || Core.isSubClassOf(b, a);
@@ -1303,30 +1404,20 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 			return found;
 		}
 
-		/** Exact match, then a case-insensitive match against the object's real members. */
+		/** Exact match, then the same member-list matching the associations use. */
 		private String attribute(IContext context, IMendixObject sample, String... candidates)
 		{
 			String direct = firstPresent(sample, candidates);
 			if (direct != null)
 				return direct;
-			for (String candidate : candidates)
-			{
-				for (String actual : memberNames(context, sample))
-				{
-					if (actual.equalsIgnoreCase(candidate))
-					{
-						notes.add("Resolved '" + candidate + "' to '" + actual + "' on " + sample.getType() + ".");
-						return actual;
-					}
-				}
-			}
-			return null;
+			return memberLike(context, sample, candidates, "attribute");
 		}
 
 		/** What this run actually bound to, for the report and for support questions. */
 		Map<String, Object> describe()
 		{
 			Map<String, Object> m = new LinkedHashMap<String, Object>();
+			m.put("build", BUILD);
 			m.put("templateObjectType", templateObjectType);
 			m.put("objectTypeOwnedByTemplate", Boolean.valueOf(objectTypeOwnedByTemplate));
 			m.put("columnTemplate", columnTemplate);
@@ -1375,7 +1466,7 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 		static String describeFailure(IContext context, IMendixObject object, String what)
 		{
 			List<String> names = memberNames(context, object);
-			return "Could not find " + what + " on " + object.getType() + ". "
+			return "Could not find " + what + " on " + object.getType() + " [" + BUILD + "]. "
 					+ "This action adapts to the Excel Importer / Mx Model Reflection domain model at runtime, "
 					+ "but nothing on this entity matched. Members present: "
 					+ (names.isEmpty() ? "(could not be listed)" : names.toString());
