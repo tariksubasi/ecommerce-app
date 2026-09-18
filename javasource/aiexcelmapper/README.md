@@ -10,7 +10,10 @@ Geriye ne olup bittigini anlatan bir JSON rapor doner.
 
 Hedef surum **Mendix 10.24**. Action, Studio Pro 10'un urettigi sekilde
 `com.mendix.systemwideinterfaces.core.UserAction<String>` extend eder.
-Harici jar yok — JSON okuyucu/yazici ve HTTP istemcisi dosyanin icinde.
+JSON okuyucu/yazici ve HTTP istemcisi dosyanin icinde; tek harici bagimlilik
+sample deger okurken kullanilan Apache POI, o da zaten Excel Importer ile
+`userlib`'de geliyor (`poi-4.1.2`, `poi-ooxml-4.1.2`). POI bulunamazsa action
+patlamaz, sadece header ile devam eder.
 
 ## Studio Pro kurulumu
 
@@ -32,6 +35,7 @@ Harici jar yok — JSON okuyucu/yazici ve HTTP istemcisi dosyanin icinde.
    | 7 | `OverwriteExisting` | Boolean | hayir (bos → true) |
    | 8 | `DryRun` | Boolean | hayir (bos → false) |
    | 9 | `TimeoutSeconds` | Integer/Long | hayir (bos → 120) |
+   | 10 | `SampleRowCount` | Integer/Long | hayir (bos → 5, `0` → sadece header) |
 
    Return type: **String**.
 
@@ -52,7 +56,7 @@ Harici jar yok — JSON okuyucu/yazici ve HTTP istemcisi dosyanin icinde.
    ```
    Java action  JA_AIMapExcelTemplate($Template, @LLM_Endpoint, @LLM_ApiKey,
                                       @LLM_Model, empty, 'dd.MM.yyyy',
-                                      true, false, empty)   ->  $Report
+                                      true, false, empty, 5)   ->  $Report
    Show message $Report                      (istege bagli, debug icin)
    Refresh      $Template
    ```
@@ -61,6 +65,39 @@ Harici jar yok — JSON okuyucu/yazici ve HTTP istemcisi dosyanin icinde.
 
 6. **Buton** — Excel Importer'in Template detay sayfasina bir Call microflow
    butonu koy, caption `AI ile Eslestir`, microflow `ACT_AI_MapExcelTemplate`.
+
+## Sample deger okuma
+
+`SampleRowCount > 0` ise action, template'e bagli sample Excel dosyasini
+(`TemplateDocument_Template`) POI ile acar ve `SheetIndex` / `FirstDataRowNumber`
+ayarlarina gore ilk N data satirini okur. Hucreler Excel'de **gorundugu gibi**
+alinir — tarih kolonu `15.03.2019` olarak gider, basinda sifir olan telefon
+`0532 111 22 33` olarak kalir. Formul hucrelerinde cached sonuc kullanilir
+(formul evaluate edilmez, POI'nin desteklemedigi fonksiyonda patlamasin diye).
+
+LLM'e giden payload boyle olur:
+
+```json
+{"entity":"HR.Personel",
+ "excelColumns":[
+   {"columnNumber":0,"header":"Sicil Numarası",
+    "sampleValues":["10023","10024","10025"],"samplesAllDistinct":true},
+   {"columnNumber":2,"header":"İşe Giriş Tarihi",
+    "sampleValues":["15.03.2019","01.07.2020"],"samplesAllDistinct":true}],
+ "allowedAttributes":[{"name":"SicilNo","type":"String","keyable":true}]}
+```
+
+`samplesAllDistinct` key secimi icin en degerli sinyal: bir kolonun ornek
+degerlerinin hepsi farkliysa identifier adayidir, tekrar ediyorsa degildir.
+
+**Onemli — KVKK:** bu mod gercek hucre degerlerini LLM gateway'ine gonderir.
+Personel entity'sinde bu gercek isim, telefon ve sicil demektir. Gateway'in
+sirket ici oldugundan ve istekleri loglamadigindan emin ol. Istemiyorsan
+`SampleRowCount = 0` ver, sistem sadece header ile calisir.
+
+Sampling bir optimizasyon olarak ele alinir: dosya yoksa, bos ise, sheet
+numarasi tutmuyorsa, 25MB'tan buyukse veya POI classpath'te degilse action
+**patlamaz** — uyari yazar ve header-only devam eder.
 
 ## Onkosullar
 
@@ -131,8 +168,9 @@ LLM'in soyledigi hicbir sey dogrudan yazilmiyor:
 - Iki kolon ayni attribute'a giderse yuksek confidence kazanir, digeri
   `SKIPPED_DUPLICATE` olarak raporlanir.
 - `MinConfidence` altindaki oneriler atlanir.
-- Excel basliklari veri olarak muamele gorur: kontrol karakterleri temizlenir,
-  200 karakterde kesilir ve sadece user mesajinda yer alir.
+- Excel basliklari ve hucre degerleri veri olarak muamele gorur: kontrol
+  karakterleri temizlenir, baslik 200 / hucre 80 karakterde kesilir ve sadece
+  user mesajinda yer alir. System prompt'ta ikisinin de talimat olmadigi yazar.
 - Hicbir batch'te commit yok; tum LLM cagrilari bittikten sonra tek seferde
   `Core.commit` cagrilir. Ortada kalan yarim yazma olmaz.
 
@@ -175,5 +213,5 @@ LLM'in soyledigi hicbir sey dogrudan yazilmiyor:
 - **Once dene**: `DryRun = true` ile calistir, raporu oku, sonra gercek calistir.
 - **Elle yapilan islerin korunmasi**: `OverwriteExisting = false` dersen zaten
   attribute atanmis kolonlara dokunulmaz.
-- **Ilk surumde yok**: Excel satir verisini LLM'e gonderme, reference mapping,
-  enum value mapping, parse microflow secimi. Hicbiri bu surum icin gerekli degil.
+- **Bu surumde yok**: reference mapping, enum value mapping, parse microflow
+  secimi. Hicbiri bu surum icin gerekli degil.
