@@ -99,6 +99,40 @@ Sampling bir optimizasyon olarak ele alinir: dosya yoksa, bos ise, sheet
 numarasi tutmuyorsa, 25MB'tan buyukse veya POI classpath'te degilse action
 **patlamaz** — uyari yazar ve header-only devam eder.
 
+## Surum bagimsizligi
+
+Excel Importer ve Mx Model Reflection major surumler arasinda member isimlerini
+degistiriyor. Bu yuzden action hicbir ismi sabit tutmuyor: calisma aninda
+metamodelden **ne isim tasidigina degil, neyi gosterdigine** bakarak cozuyor.
+
+Ornegin hedef entity baglantisi once `Template_MxObjectType` olarak deneniyor;
+yoksa `Core.getMetaAssociations()` icinden `Template` ile `MxObjectType`
+arasindaki association bulunuyor. Association MxObjectType tarafindan
+sahipleniliyorsa (yani Template'te member yoksa) XPath ile sorgulaniyor.
+Reference mapping'e ait association'lar (`*_Reference`) bu aramada eleniyor,
+boylece yanlislikla reference tarafina yazilmiyor.
+
+Ayni sey Column, MxObjectMember ve MxObjectType member'lari icin de gecerli;
+her biri icin birkac aday isim ve buyuk-kucuk harf toleransi var.
+
+Rapor, o calismada neye baglandigini `resolvedSchema` altinda yaziyor:
+
+```json
+"resolvedSchema":{"templateObjectType":"Template_MxObjectType",
+                  "columnMember":"Column_MxObjectMember",
+                  "mappingType":"MappingType", ...}
+```
+
+Bir member gercekten cozulemezse hata, o entity'nin **sahip oldugu tum
+member'lari listeliyor** — yani surum farki tek ekran goruntusunden teshis
+edilebiliyor:
+
+```
+Could not find the mapping type (tried [MappingType, Type]) on
+ExcelImporter.Column. ... Members present: [AttributeTypeEnum, ColNumber,
+Column_MxObjectMember, ..., IsKey, IsReferenceKey, Text]
+```
+
 ## Onkosullar
 
 - Hedef entity'nin modulu **Mx Model Reflection** ekraninda synchronize edilmis

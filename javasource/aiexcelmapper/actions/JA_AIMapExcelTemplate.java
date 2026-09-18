@@ -1005,6 +1005,318 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 	}
 
 	// ---------------------------------------------------------------------------------
+	// Schema resolution.
+	//
+	// Excel Importer and Mx Model Reflection rename and reshape members between major
+	// versions, so nothing here is hard-coded. The names below are only the preferred
+	// spelling; when one is absent the member is discovered from the live metamodel, by
+	// what it points at rather than by what it is called. A member that genuinely cannot
+	// be resolved produces an error that lists what the entity does have, so a version
+	// difference is diagnosable from a single screenshot.
+	// ---------------------------------------------------------------------------------
+
+	static final class Schema
+	{
+		static final String E_TEMPLATE = "ExcelImporter.Template";
+		static final String E_COLUMN   = "ExcelImporter.Column";
+		static final String E_DOCUMENT = "ExcelImporter.TemplateDocument";
+		static final String E_MEMBER   = "MxModelReflection.MxObjectMember";
+		static final String E_OBJTYPE  = "MxModelReflection.MxObjectType";
+
+		// Template
+		String templateObjectType;          // Template -> MxObjectType
+		boolean objectTypeOwnedByTemplate = true;
+		String templateSheetIndex;
+		String templateFirstDataRow;
+		String documentTemplate;            // TemplateDocument -> Template
+
+		// Column
+		String columnTemplate;
+		String columnObjectType;
+		String columnMember;
+		String colNumber;
+		String colText;
+		String colMappingType;
+		String colDataSource;
+		String colIsKey;
+		String colIsReferenceKey;
+		String colAttributeType;
+		String colInputMask;
+
+		// MxObjectMember / MxObjectType
+		String memberAttributeName;
+		String memberAttributeType;
+		String memberIsVirtual;
+		String memberObjectType;
+		String objectTypeCompleteName;
+		String objectTypeSuperclasses;
+
+		final List<String> notes = new ArrayList<String>();
+
+		/**
+		 * First stage: everything that can be settled from the Template itself and from
+		 * the association graph. Association names need no sample object, which is what
+		 * lets the column and member queries run before their own members are known.
+		 */
+		static Schema forTemplate(IContext context, IMendixObject template) throws Exception
+		{
+			Schema s = new Schema();
+			String templateType = template.getType();
+
+			s.templateObjectType = s.association(context, template, templateType, E_OBJTYPE,
+					new String[] { "Template_MxObjectType" }, "the target entity");
+			if (s.templateObjectType == null)
+			{
+				// Some versions own this association from the MxObjectType side, in which
+				// case the Template holds no member for it and it must be queried instead.
+				String reverse = s.associationName(E_OBJTYPE, templateType, new String[0]);
+				if (reverse == null)
+					throw new MappingException(describeFailure(context, template,
+							"an association from " + templateType + " to " + E_OBJTYPE));
+				s.templateObjectType = reverse;
+				s.objectTypeOwnedByTemplate = false;
+				s.notes.add("'" + reverse + "' is owned by MxObjectType, so the target entity is looked up by query.");
+			}
+
+			s.templateSheetIndex   = s.attribute(context, template, "SheetIndex", "Sheet", "SheetNumber");
+			s.templateFirstDataRow = s.attribute(context, template, "FirstDataRowNumber", "FirstDataRow", "DataRowNumber");
+
+			s.columnTemplate   = s.associationName(E_COLUMN, templateType, new String[] { "Column_Template" });
+			s.columnObjectType = s.associationName(E_COLUMN, E_OBJTYPE, new String[] { "Column_MxObjectType" });
+			s.columnMember     = s.associationName(E_COLUMN, E_MEMBER, new String[] { "Column_MxObjectMember" });
+			s.memberObjectType = s.associationName(E_MEMBER, E_OBJTYPE, new String[] { "MxObjectMember_MxObjectType" });
+			s.documentTemplate = s.associationName(E_DOCUMENT, templateType, new String[] { "TemplateDocument_Template" });
+
+			if (s.columnTemplate == null)
+				throw new MappingException("Could not find the association from " + E_COLUMN + " to " + templateType
+						+ ". This action adapts to the Excel Importer domain model at runtime, but nothing matched.");
+			return s;
+		}
+
+		/** Second stage: the Column members, learned from a real column of this template. */
+		void learnColumn(IContext context, IMendixObject sample) throws MappingException
+		{
+			colNumber         = require(context, sample, "the Excel column index", "ColNumber", "ColumnNumber", "Nr");
+			colText           = require(context, sample, "the Excel header text", "Text", "Caption", "Header");
+			colMappingType    = require(context, sample, "the mapping type", "MappingType", "Type");
+			colDataSource     = require(context, sample, "the data source", "DataSource", "Source");
+			colIsKey          = require(context, sample, "the key flag", "IsKey", "Key");
+			colIsReferenceKey = attribute(context, sample, "IsReferenceKey", "ReferenceKey");
+			colAttributeType  = attribute(context, sample, "AttributeTypeEnum", "AttributeType");
+			colInputMask      = attribute(context, sample, "InputMask", "Mask", "DateFormat");
+
+			if (columnObjectType != null && !sample.hasMember(columnObjectType))
+				columnObjectType = null;
+			if (columnMember == null || !sample.hasMember(columnMember))
+				throw new MappingException(describeFailure(context, sample,
+						"the association to " + E_MEMBER + " that carries the mapped attribute"));
+		}
+
+		/** Third stage: the MxObjectMember members. */
+		void learnMember(IContext context, IMendixObject sample) throws MappingException
+		{
+			memberAttributeName = require(context, sample, "the attribute name", "AttributeName", "Name");
+			memberAttributeType = attribute(context, sample, "AttributeTypeEnum", "AttributeType");
+			memberIsVirtual     = attribute(context, sample, "IsVirtual", "Virtual");
+		}
+
+		/** Third stage: the MxObjectType members. */
+		void learnObjectType(IContext context, IMendixObject sample) throws MappingException
+		{
+			objectTypeCompleteName = require(context, sample, "the entity name", "CompleteName", "FullName", "Name");
+			objectTypeSuperclasses = firstPresent(sample,
+					"MxObjectType_SubClassOf_MxObjectType", "MxObjectType_Generalization", "MxObjectType_SuperClass");
+		}
+
+		// -- resolution primitives ----------------------------------------------------
+
+		/** Preferred name if the object has it, otherwise discovery by what it points at. */
+		private String association(IContext context, IMendixObject sample, String ownerEntity, String targetEntity,
+				String[] preferred, String what) throws MappingException
+		{
+			String direct = firstPresent(sample, preferred);
+			if (direct != null)
+				return direct;
+
+			String discovered = associationName(ownerEntity, targetEntity, preferred);
+			if (discovered != null && sample.hasMember(discovered))
+			{
+				notes.add("Resolved " + what + " on " + ownerEntity + " to '" + discovered
+						+ "' (expected '" + preferred[0] + "').");
+				return discovered;
+			}
+			return null;
+		}
+
+		/**
+		 * Finds the association linking two entities, ignoring the ones that carry the
+		 * reference-mapping half of the Excel Importer model. Returns null when there is
+		 * no match or when the match is ambiguous.
+		 */
+		private String associationName(String ownerEntity, String targetEntity, String[] preferred)
+		{
+			List<String> matches = new ArrayList<String>();
+			Collection<? extends com.mendix.systemwideinterfaces.core.meta.IMetaAssociation> all;
+			try
+			{
+				all = Core.getMetaAssociations();
+			}
+			catch (RuntimeException ex)
+			{
+				return null;
+			}
+			if (all == null)
+				return null;
+
+			for (com.mendix.systemwideinterfaces.core.meta.IMetaAssociation association : all)
+			{
+				if (association.getParent() == null || association.getChild() == null)
+					continue;
+				if (!related(association.getParent().getName(), ownerEntity))
+					continue;
+				if (!related(association.getChild().getName(), targetEntity))
+					continue;
+				String name = shortName(association.getName());
+				if (!matches.contains(name))
+					matches.add(name);
+			}
+
+			for (String candidate : preferred)
+				if (matches.contains(candidate))
+					return candidate;
+
+			// Drop the reference-mapping associations; they are never ours to touch.
+			List<String> main = new ArrayList<String>();
+			for (String name : matches)
+				if (!name.toLowerCase(Locale.ROOT).contains("reference"))
+					main.add(name);
+			if (main.size() == 1)
+				return main.get(0);
+			if (main.size() > 1)
+			{
+				notes.add("Ambiguous association from " + ownerEntity + " to " + targetEntity + ": " + main
+						+ "; none was used.");
+				return null;
+			}
+			return matches.size() == 1 ? matches.get(0) : null;
+		}
+
+		/** True when the two entity names are the same or one inherits from the other. */
+		private static boolean related(String a, String b)
+		{
+			if (a == null || b == null)
+				return false;
+			if (a.equals(b))
+				return true;
+			try
+			{
+				return Core.isSubClassOf(a, b) || Core.isSubClassOf(b, a);
+			}
+			catch (RuntimeException ex)
+			{
+				return false;
+			}
+		}
+
+		private static String shortName(String qualified)
+		{
+			if (qualified == null)
+				return null;
+			int dot = qualified.indexOf('.');
+			return dot < 0 ? qualified : qualified.substring(dot + 1);
+		}
+
+		/** An attribute that must exist; the error names every member the entity does have. */
+		private String require(IContext context, IMendixObject sample, String what, String... candidates)
+				throws MappingException
+		{
+			String found = attribute(context, sample, candidates);
+			if (found == null)
+				throw new MappingException(describeFailure(context, sample, what + " (tried "
+						+ java.util.Arrays.toString(candidates) + ")"));
+			return found;
+		}
+
+		/** Exact match, then a case-insensitive match against the object's real members. */
+		private String attribute(IContext context, IMendixObject sample, String... candidates)
+		{
+			String direct = firstPresent(sample, candidates);
+			if (direct != null)
+				return direct;
+			for (String candidate : candidates)
+			{
+				for (String actual : memberNames(context, sample))
+				{
+					if (actual.equalsIgnoreCase(candidate))
+					{
+						notes.add("Resolved '" + candidate + "' to '" + actual + "' on " + sample.getType() + ".");
+						return actual;
+					}
+				}
+			}
+			return null;
+		}
+
+		/** What this run actually bound to, for the report and for support questions. */
+		Map<String, Object> describe()
+		{
+			Map<String, Object> m = new LinkedHashMap<String, Object>();
+			m.put("templateObjectType", templateObjectType);
+			m.put("objectTypeOwnedByTemplate", Boolean.valueOf(objectTypeOwnedByTemplate));
+			m.put("columnTemplate", columnTemplate);
+			m.put("columnObjectType", columnObjectType);
+			m.put("columnMember", columnMember);
+			m.put("colNumber", colNumber);
+			m.put("colText", colText);
+			m.put("mappingType", colMappingType);
+			m.put("dataSource", colDataSource);
+			m.put("isKey", colIsKey);
+			m.put("isReferenceKey", colIsReferenceKey);
+			m.put("attributeTypeEnum", colAttributeType);
+			m.put("inputMask", colInputMask);
+			m.put("memberAttributeName", memberAttributeName);
+			m.put("memberObjectType", memberObjectType);
+			m.put("objectTypeCompleteName", objectTypeCompleteName);
+			m.put("objectTypeSuperclasses", objectTypeSuperclasses);
+			m.put("documentTemplate", documentTemplate);
+			return m;
+		}
+
+		private static String firstPresent(IMendixObject sample, String... candidates)
+		{
+			for (String candidate : candidates)
+				if (candidate != null && sample.hasMember(candidate))
+					return candidate;
+			return null;
+		}
+
+		static List<String> memberNames(IContext context, IMendixObject object)
+		{
+			List<String> names = new ArrayList<String>();
+			try
+			{
+				names.addAll(object.getMembers(context).keySet());
+			}
+			catch (RuntimeException ex)
+			{
+				// Older runtimes can refuse getMembers on a partially loaded object.
+			}
+			java.util.Collections.sort(names);
+			return names;
+		}
+
+		/** The message that turns "your module version appears to differ" into a fix. */
+		static String describeFailure(IContext context, IMendixObject object, String what)
+		{
+			List<String> names = memberNames(context, object);
+			return "Could not find " + what + " on " + object.getType() + ". "
+					+ "This action adapts to the Excel Importer / Mx Model Reflection domain model at runtime, "
+					+ "but nothing on this entity matched. Members present: "
+					+ (names.isEmpty() ? "(could not be listed)" : names.toString());
+		}
+	}
+
+	// ---------------------------------------------------------------------------------
 	// Sample data reader.
 	// Reads the first few data rows out of the template's own sample file so the model
 	// sees what a column actually contains, not just what its header is called. Uses the
@@ -1015,16 +1327,22 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 	static final class SampleReader
 	{
 		/** Column number -> the displayed value of each sampled cell, blanks removed. */
-		static Map<Integer, List<String>> read(IContext context, IMendixObject template, Cfg cfg,
+		static Map<Integer, List<String>> read(IContext context, IMendixObject template, Cfg cfg, Schema schema,
 				ILogNode log, List<String> warnings)
 		{
 			Map<Integer, List<String>> samples = new LinkedHashMap<Integer, List<String>>();
 			if (cfg.sampleRowCount <= 0)
 				return samples;
+			if (schema.documentTemplate == null)
+			{
+				warnings.add("This Excel Importer version exposes no link from the sample document to the template, "
+						+ "so only the column headers were sent.");
+				return samples;
+			}
 
 			try
 			{
-				IMendixObject document = findSampleDocument(context, template);
+				IMendixObject document = findSampleDocument(context, template, schema);
 				if (document == null)
 				{
 					warnings.add("No sample Excel file is attached to this template, so only the column headers were sent. "
@@ -1040,8 +1358,8 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 					return samples;
 				}
 
-				int sheetIndex = oneBasedToIndex(context, template, "SheetIndex");
-				int firstDataRow = oneBasedToIndex(context, template, "FirstDataRowNumber");
+				int sheetIndex = oneBasedToIndex(context, template, schema.templateSheetIndex);
+				int firstDataRow = oneBasedToIndex(context, template, schema.templateFirstDataRow);
 				int rowsWanted = Math.min(cfg.sampleRowCount, Cfg.MAX_SAMPLE_ROWS);
 
 				InputStream content = Core.getFileDocumentContent(context, document);
@@ -1072,10 +1390,11 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 		}
 
 		/** The newest TemplateDocument attached to this template that actually holds a file. */
-		private static IMendixObject findSampleDocument(IContext context, IMendixObject template) throws Exception
+		private static IMendixObject findSampleDocument(IContext context, IMendixObject template, Schema schema)
+				throws Exception
 		{
 			List<IMendixObject> documents = Core.retrieveXPathQuery(context,
-					"//ExcelImporter.TemplateDocument[TemplateDocument_Template=" + template.getId().toLong() + "]");
+					"//" + Schema.E_DOCUMENT + "[" + schema.documentTemplate + "=" + template.getId().toLong() + "]");
 			IMendixObject chosen = null;
 			for (IMendixObject document : documents)
 			{
@@ -1090,7 +1409,8 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 		/** Template row and sheet numbers are 1-based in the domain model, 0-based in POI. */
 		private static int oneBasedToIndex(IContext context, IMendixObject template, String member) throws Exception
 		{
-			Integer value = template.hasMember(member) ? (Integer) template.getValue(context, member) : null;
+			Integer value = member != null && template.hasMember(member)
+					? (Integer) template.getValue(context, member) : null;
 			return value == null ? 0 : Math.max(0, value.intValue() - 1);
 		}
 
@@ -1211,35 +1531,9 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 
 	static final class Mapper
 	{
-		// Entity names. Fixed by the marketplace modules; kept in one place so a rename
-		// in a future module version is a one-line fix.
-		private static final String E_TEMPLATE = "ExcelImporter.Template";
-		private static final String E_COLUMN   = "ExcelImporter.Column";
-		private static final String E_MEMBER   = "MxModelReflection.MxObjectMember";
-
-		// Template members.
-		private static final String T_OBJECT_TYPE = "Template_MxObjectType";
-
-		// Column members we write.
-		private static final String C_COL_NUMBER   = "ColNumber";
-		private static final String C_TEXT         = "Text";
-		private static final String C_TEMPLATE     = "Column_Template";
-		private static final String C_OBJECT_TYPE  = "Column_MxObjectType";
-		private static final String C_MEMBER       = "Column_MxObjectMember";
-		private static final String C_MAPPING_TYPE = "MappingType";
-		private static final String C_DATA_SOURCE  = "DataSource";
-		private static final String C_IS_KEY       = "IsKey";
-		private static final String C_IS_REF_KEY   = "IsReferenceKey";
-		private static final String C_ATTR_TYPE    = "AttributeTypeEnum";
-		private static final String C_INPUT_MASK   = "InputMask";
-
-		// MxObjectType / MxObjectMember members.
-		private static final String O_COMPLETE_NAME = "CompleteName";
-		private static final String O_SUPERCLASSES  = "MxObjectType_SubClassOf_MxObjectType";
-		private static final String M_ATTR_NAME     = "AttributeName";
-		private static final String M_ATTR_TYPE     = "AttributeTypeEnum";
-		private static final String M_IS_VIRTUAL    = "IsVirtual";
-		private static final String M_OBJECT_TYPE   = "MxObjectMember_MxObjectType";
+		private static final String E_TEMPLATE = Schema.E_TEMPLATE;
+		private static final String E_COLUMN   = Schema.E_COLUMN;
+		private static final String E_MEMBER   = Schema.E_MEMBER;
 
 		// ExcelImporter enumeration values, as stored in the database.
 		private static final String MAPPING_ATTRIBUTE = "Attribute";
@@ -1262,6 +1556,8 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 		private final Cfg cfg;
 		private final ILogNode log = Core.getLogger("AIExcelMapper");
 		private final List<String> warnings = new ArrayList<String>();
+		/** The member names this app actually uses, resolved at the start of run(). */
+		private Schema schema;
 
 		Mapper(IContext context, IMendixObject template, Cfg cfg)
 		{
@@ -1275,16 +1571,28 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 			long startedAt = System.currentTimeMillis();
 			validateParameters();
 
+			// Learn this app's actual Excel Importer / Mx Model Reflection member names
+			// before touching anything, so a module version difference is a resolved name
+			// rather than a crash.
+			schema = Schema.forTemplate(context, template);
+
 			IMendixObject objectType = resolveTargetObjectType();
-			String entityName = requireString(objectType, O_COMPLETE_NAME,
-					"The selected Mendix Object has no CompleteName. Re-synchronize Mx Model Reflection.");
+			schema.learnObjectType(context, objectType);
+			String entityName = requireString(objectType, schema.objectTypeCompleteName,
+					"The selected Mendix Object has no entity name. Re-synchronize Mx Model Reflection.");
 
 			IMetaObject metaObject = resolveMetaObject(entityName);
 			List<IMendixObject> columns = retrieveColumns();
+			schema.learnColumn(context, columns.get(0));
+			sortByColumnNumber(columns);
 			Map<String, Attribute> attributes = retrieveAttributes(objectType, entityName, metaObject);
 
+			for (String note : schema.notes)
+				log.info("AIExcelMapper: " + note);
+			warnings.addAll(schema.notes);
+
 			List<ColumnInfo> columnInfos = describeColumns(columns);
-			attachSamples(columnInfos, SampleReader.read(context, template, cfg, log, warnings));
+			attachSamples(columnInfos, SampleReader.read(context, template, cfg, schema, log, warnings));
 			LlmClient client = new LlmClient(cfg, log, warnings);
 
 			// Ask the model. Nothing is written before every batch has come back, so a
@@ -1353,12 +1661,25 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 
 		private IMendixObject resolveTargetObjectType() throws Exception
 		{
-			requireMember(template, T_OBJECT_TYPE, E_TEMPLATE);
-			IMendixIdentifier id = (IMendixIdentifier) template.getValue(context, T_OBJECT_TYPE);
-			if (id == null)
-				throw new MappingException("This template has no Mendix Object selected yet. "
-						+ "Open the template, pick the target entity, then run the AI mapping.");
-			IMendixObject objectType = Core.retrieveId(context, id);
+			IMendixObject objectType;
+			if (schema.objectTypeOwnedByTemplate)
+			{
+				IMendixIdentifier id = (IMendixIdentifier) template.getValue(context, schema.templateObjectType);
+				if (id == null)
+					throw new MappingException("This template has no Mendix Object selected yet. "
+							+ "Open the template, pick the target entity, then run the AI mapping.");
+				objectType = Core.retrieveId(context, id);
+			}
+			else
+			{
+				List<IMendixObject> found = Core.retrieveXPathQuery(context,
+						"//" + Schema.E_OBJTYPE + "[" + schema.templateObjectType + "=" + template.getId().toLong() + "]");
+				if (found.isEmpty())
+					throw new MappingException("This template has no Mendix Object selected yet. "
+							+ "Open the template, pick the target entity, then run the AI mapping.");
+				objectType = found.get(0);
+			}
+
 			if (objectType == null)
 				throw new MappingException("The template points at a Mendix Object that no longer exists. "
 						+ "Re-synchronize Mx Model Reflection and re-select the entity.");
@@ -1383,17 +1704,41 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 			return meta;
 		}
 
+		/**
+		 * Retrieved unsorted: the column-number member is only known once a real column
+		 * has been inspected, so the ordering the duplicate resolution relies on is
+		 * applied afterwards, in sortByColumnNumber.
+		 */
 		private List<IMendixObject> retrieveColumns() throws Exception
 		{
-			Map<String, String> sort = new HashMap<String, String>();
-			sort.put(C_COL_NUMBER, "ASC");
 			List<IMendixObject> columns = Core.retrieveXPathQuery(context,
-					"//" + E_COLUMN + "[" + C_TEMPLATE + "=" + template.getId().toLong() + "]",
-					Integer.MAX_VALUE, 0, sort);
+					"//" + E_COLUMN + "[" + schema.columnTemplate + "=" + template.getId().toLong() + "]");
 			if (columns.isEmpty())
 				throw new MappingException("This template has no columns yet. "
 						+ "Upload a sample Excel file first so Excel Importer can read the header row.");
 			return columns;
+		}
+
+		private void sortByColumnNumber(List<IMendixObject> columns)
+		{
+			final IContext ctx = context;
+			final String member = schema.colNumber;
+			java.util.Collections.sort(columns, new java.util.Comparator<IMendixObject>()
+			{
+				@Override
+				public int compare(IMendixObject a, IMendixObject b)
+				{
+					Integer x = (Integer) a.getValue(ctx, member);
+					Integer y = (Integer) b.getValue(ctx, member);
+					if (x == null && y == null)
+						return 0;
+					if (x == null)
+						return 1;
+					if (y == null)
+						return -1;
+					return x.compareTo(y);
+				}
+			});
 		}
 
 		/**
@@ -1438,28 +1783,35 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 			if (objectType == null || depth > 10 || !visited.add(Long.valueOf(objectType.getId().toLong())))
 				return;
 
+			if (schema.memberObjectType == null)
+				throw new MappingException("Could not find the association from " + E_MEMBER + " to "
+						+ Schema.E_OBJTYPE + ". Re-synchronize Mx Model Reflection.");
+
 			List<IMendixObject> members = Core.retrieveXPathQuery(context,
-					"//" + E_MEMBER + "[" + M_OBJECT_TYPE + "=" + objectType.getId().toLong() + "]");
+					"//" + E_MEMBER + "[" + schema.memberObjectType + "=" + objectType.getId().toLong() + "]");
+
+			if (schema.memberAttributeName == null && !members.isEmpty())
+				schema.learnMember(context, members.get(0));
 
 			for (IMendixObject member : members)
 			{
-				String name = Cfg.trimToNull(asString(member, M_ATTR_NAME));
+				String name = Cfg.trimToNull(asString(member, schema.memberAttributeName));
 				if (name == null || target.containsKey(name))
 					continue; // the most derived definition wins
 
 				Attribute attribute = new Attribute();
 				attribute.name = name;
 				attribute.object = member;
-				attribute.reflectedType = asString(member, M_ATTR_TYPE);
+				attribute.reflectedType = asString(member, schema.memberAttributeType);
 
-				Boolean virtual = member.hasMember(M_IS_VIRTUAL)
-						? (Boolean) member.getValue(context, M_IS_VIRTUAL) : Boolean.FALSE;
+				Boolean virtual = schema.memberIsVirtual != null && member.hasMember(schema.memberIsVirtual)
+						? (Boolean) member.getValue(context, schema.memberIsVirtual) : Boolean.FALSE;
 
 				IMetaPrimitive primitive = primitives.get(name);
 				if (primitive == null)
 				{
 					attribute.writable = false;
-					attribute.reason = "no longer exists on " + objectType.getValue(context, O_COMPLETE_NAME)
+					attribute.reason = "no longer exists on " + asString(objectType, schema.objectTypeCompleteName)
 							+ "; re-synchronize Mx Model Reflection";
 				}
 				else
@@ -1485,7 +1837,8 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 				target.put(name, attribute);
 			}
 
-			Object superclasses = objectType.hasMember(O_SUPERCLASSES) ? objectType.getValue(context, O_SUPERCLASSES) : null;
+			Object superclasses = schema.objectTypeSuperclasses != null && objectType.hasMember(schema.objectTypeSuperclasses)
+					? objectType.getValue(context, schema.objectTypeSuperclasses) : null;
 			for (IMendixIdentifier superId : identifiers(superclasses))
 				collectAttributes(Core.retrieveId(context, superId), primitives, target, visited, depth + 1);
 		}
@@ -1503,9 +1856,9 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 				ColumnInfo info = new ColumnInfo();
 				info.object = column;
 
-				Integer number = (Integer) column.getValue(context, C_COL_NUMBER);
+				Integer number = (Integer) column.getValue(context, schema.colNumber);
 				info.number = number == null ? -1 : number.intValue();
-				info.header = sanitiseHeader(asString(column, C_TEXT));
+				info.header = sanitiseHeader(asString(column, schema.colText));
 
 				if (number == null)
 				{
@@ -1515,12 +1868,12 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 				{
 					info.reject("SKIPPED_DUPLICATE_COLUMN", "another column already uses ColNumber " + number);
 				}
-				else if (MAPPING_REFERENCE.equals(asString(column, C_MAPPING_TYPE)))
+				else if (MAPPING_REFERENCE.equals(asString(column, schema.colMappingType)))
 				{
 					// Reference mappings are hand-built and out of scope; never clobber them.
 					info.reject("SKIPPED_REFERENCE_MAPPING", "column is configured as a Reference mapping");
 				}
-				else if (!cfg.overwriteExisting && column.getValue(context, C_MEMBER) != null)
+				else if (!cfg.overwriteExisting && column.getValue(context, schema.columnMember) != null)
 				{
 					info.reject("SKIPPED_EXISTING", "already mapped and OverwriteExisting is false");
 				}
@@ -1898,26 +2251,29 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 		{
 			IMendixObject column = info.object;
 
-			setRequired(column, C_MAPPING_TYPE, MAPPING_ATTRIBUTE);
-			setRequired(column, C_DATA_SOURCE, SOURCE_CELL_VALUE);
-			setRequired(column, C_OBJECT_TYPE, objectTypeId);
-			setRequired(column, C_MEMBER, info.attribute.object.getId());
-			setRequired(column, C_IS_KEY, info.isKey ? YES : NO);
+			setRequired(column, schema.colMappingType, MAPPING_ATTRIBUTE);
+			setRequired(column, schema.colDataSource, SOURCE_CELL_VALUE);
+			// Present in every version seen so far, but not load-bearing for a plain
+			// attribute mapping, so a version without it is not a failure.
+			if (schema.columnObjectType != null)
+				setOptional(column, schema.columnObjectType, objectTypeId);
+			setRequired(column, schema.columnMember, info.attribute.object.getId());
+			setRequired(column, schema.colIsKey, info.isKey ? YES : NO);
 
 			// Present on this module version as the key flag Excel Importer stores next
 			// to IsKey. Mirrors what the Column edit page writes when Key is ticked.
-			setOptional(column, C_IS_REF_KEY, info.isKey ? REF_KEY_MAIN : REF_KEY_NONE);
+			setOptional(column, schema.colIsReferenceKey, info.isKey ? REF_KEY_MAIN : REF_KEY_NONE);
 
 			// Excel Importer reads the column's own AttributeTypeEnum to decide whether a
 			// date input mask applies, so it has to follow the chosen attribute.
 			String attributeType = Cfg.trimToNull(info.attribute.reflectedType);
 			if (attributeType != null)
-				setOptional(column, C_ATTR_TYPE, attributeType);
+				setOptional(column, schema.colAttributeType, attributeType);
 
 			if ("DateTime".equals(attributeType) && cfg.defaultDateFormat != null
-					&& column.hasMember(C_INPUT_MASK) && isBlank(asString(column, C_INPUT_MASK)))
+					&& schema.colInputMask != null && column.hasMember(schema.colInputMask) && isBlank(asString(column, schema.colInputMask)))
 			{
-				column.setValue(context, C_INPUT_MASK, cfg.defaultDateFormat);
+				column.setValue(context, schema.colInputMask, cfg.defaultDateFormat);
 			}
 
 			// Informational fields that only exist on some module versions.
@@ -1930,10 +2286,11 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 			info.dirty = true;
 		}
 
-		/** Sets a member that must exist; a missing one means an incompatible module version. */
+		/** Sets a member that must exist; schema resolution should already have proved it does. */
 		private void setRequired(IMendixObject object, String member, Object value) throws MappingException
 		{
-			requireMember(object, member, object.getType());
+			if (member == null || !object.hasMember(member))
+				throw new MappingException(Schema.describeFailure(context, object, "member '" + member + "'"));
 			object.setValue(context, member, value);
 		}
 
@@ -1994,6 +2351,7 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 			report.put("model", cfg.model);
 			report.put("dryRun", Boolean.valueOf(cfg.dryRun));
 			report.put("minConfidence", scale(cfg.minConfidence));
+			report.put("resolvedSchema", schema.describe());
 			report.put("sampleRowsRequested", Integer.valueOf(cfg.sampleRowCount));
 			report.put("columnsWithSamples", Integer.valueOf(countSampled(columns)));
 			report.put("columnsTotal", Integer.valueOf(columns.size()));
@@ -2041,14 +2399,6 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 			if (value == null)
 				throw new MappingException(message);
 			return value;
-		}
-
-		private static void requireMember(IMendixObject object, String member, String entity) throws MappingException
-		{
-			if (!object.hasMember(member))
-				throw new MappingException("Entity " + entity + " has no member '" + member + "'. "
-						+ "This action targets the standard Excel Importer / Mx Model Reflection domain model; "
-						+ "your module version appears to differ.");
 		}
 
 		/** Reads a reference-set value, which Mendix hands back as a list of identifiers. */
