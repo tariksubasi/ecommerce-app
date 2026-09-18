@@ -140,10 +140,22 @@ Excel Importer ve Mx Model Reflection major surumler arasinda member isimlerini
 degistiriyor. Bu yuzden action hicbir ismi sabit tutmuyor: calisma aninda
 metamodelden **ne isim tasidigina degil, neyi gosterdigine** bakarak cozuyor.
 
-Ornegin hedef entity baglantisi once `Template_MxObjectType` olarak deneniyor;
-yoksa `Core.getMetaAssociations()` icinden `Template` ile `MxObjectType`
-arasindaki association bulunuyor. Association MxObjectType tarafindan
-sahipleniliyorsa (yani Template'te member yoksa) XPath ile sorgulaniyor.
+**Kritik ayrinti — association member'lari modul onekli.** Mendix association
+member'larini `Modul.AssociationAdi` olarak adlandirir, attribute'lari duz birakir:
+
+```java
+// Mendix'in kendi urettigi proxy'den:
+FullName("FullName"),                                  // attribute  -> duz
+Account_ProfileImage("Administration.Account_ProfileImage")  // association -> onekli
+```
+
+Yani `hasMember("Template_MxObjectType")` **false**, `hasMember("ExcelImporter.Template_MxObjectType")`
+**true** doner. XPath'te de onekli hali kullanilir. Association isimleri bu yuzden
+`Core.getMetaAssociations()` uzerinden runtime'in kendi yazdigi haliyle aliniyor;
+tercih edilen isimle eslestirme onek atilarak yapiliyor ama donen deger onekli.
+
+Hedef entity baglantisi once bu sekilde aranir; association MxObjectType
+tarafindan sahipleniliyorsa (Template'te member yoksa) XPath ile sorgulanir.
 Reference mapping'e ait association'lar (`*_Reference`) bu aramada eleniyor,
 boylece yanlislikla reference tarafina yazilmiyor.
 

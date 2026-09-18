@@ -1167,34 +1167,56 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 		void learnObjectType(IContext context, IMendixObject sample) throws MappingException
 		{
 			objectTypeCompleteName = require(context, sample, "the entity name", "CompleteName", "FullName", "Name");
-			objectTypeSuperclasses = firstPresent(sample,
-					"MxObjectType_SubClassOf_MxObjectType", "MxObjectType_Generalization", "MxObjectType_SuperClass");
+
+			// The generalisation link is an association too, so it carries a module prefix.
+			String[] preferred = { "MxObjectType_SubClassOf_MxObjectType", "MxObjectType_Generalization",
+					"MxObjectType_SuperClass" };
+			String discovered = associationName(E_OBJTYPE, E_OBJTYPE, preferred);
+			objectTypeSuperclasses = discovered != null && sample.hasMember(discovered)
+					? discovered : firstPresent(sample, qualifiedVariants(preferred, E_OBJTYPE));
 		}
 
 		// -- resolution primitives ----------------------------------------------------
 
-		/** Preferred name if the object has it, otherwise discovery by what it points at. */
+		/** Discovery first, since only the metamodel knows the module a member is qualified with. */
 		private String association(IContext context, IMendixObject sample, String ownerEntity, String targetEntity,
 				String[] preferred, String what) throws MappingException
 		{
-			String direct = firstPresent(sample, preferred);
-			if (direct != null)
-				return direct;
-
 			String discovered = associationName(ownerEntity, targetEntity, preferred);
 			if (discovered != null && sample.hasMember(discovered))
 			{
-				notes.add("Resolved " + what + " on " + ownerEntity + " to '" + discovered
-						+ "' (expected '" + preferred[0] + "').");
+				if (!discovered.endsWith("." + preferred[0]) && !discovered.equals(preferred[0]))
+					notes.add("Resolved " + what + " on " + ownerEntity + " to '" + discovered
+							+ "' (expected '" + preferred[0] + "').");
 				return discovered;
 			}
-			return null;
+			return firstPresent(sample, qualifiedVariants(preferred, ownerEntity));
+		}
+
+		/**
+		 * Mendix names association members with their module, "ExcelImporter.Column_Template",
+		 * while attributes stay bare. Both spellings are tried so a preferred name still
+		 * works when discovery cannot reach the metamodel.
+		 */
+		private static String[] qualifiedVariants(String[] preferred, String ownerEntity)
+		{
+			int dot = ownerEntity == null ? -1 : ownerEntity.indexOf('.');
+			String module = dot < 0 ? null : ownerEntity.substring(0, dot);
+			List<String> out = new ArrayList<String>(preferred.length * 2);
+			for (String name : preferred)
+			{
+				if (module != null)
+					out.add(module + "." + name);
+				out.add(name);
+			}
+			return out.toArray(new String[out.size()]);
 		}
 
 		/**
 		 * Finds the association linking two entities, ignoring the ones that carry the
-		 * reference-mapping half of the Excel Importer model. Returns null when there is
-		 * no match or when the match is ambiguous.
+		 * reference-mapping half of the Excel Importer model. Returns the runtime's own
+		 * member name, module prefix included. Null when there is no match or the match
+		 * is ambiguous.
 		 */
 		private String associationName(String ownerEntity, String targetEntity, String[] preferred)
 		{
@@ -1219,19 +1241,20 @@ public class JA_AIMapExcelTemplate extends UserAction<java.lang.String>
 					continue;
 				if (!related(association.getChild().getName(), targetEntity))
 					continue;
-				String name = shortName(association.getName());
+				String name = association.getName(); // module-qualified, as members are named
 				if (!matches.contains(name))
 					matches.add(name);
 			}
 
 			for (String candidate : preferred)
-				if (matches.contains(candidate))
-					return candidate;
+				for (String name : matches)
+					if (candidate.equals(shortName(name)) || candidate.equals(name))
+						return name;
 
 			// Drop the reference-mapping associations; they are never ours to touch.
 			List<String> main = new ArrayList<String>();
 			for (String name : matches)
-				if (!name.toLowerCase(Locale.ROOT).contains("reference"))
+				if (!shortName(name).toLowerCase(Locale.ROOT).contains("reference"))
 					main.add(name);
 			if (main.size() == 1)
 				return main.get(0);
